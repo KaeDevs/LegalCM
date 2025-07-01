@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:legalcm/app/utils/tools.dart';
 import '../../data/models/case_model.dart';
 import '../../data/models/client_model.dart';
@@ -10,16 +11,16 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    // final size = MediaQuery.of(context).size;
 
     final caseBox = Hive.isBoxOpen('cases') ? Hive.box<CaseModel>('cases') : null;
     final clientBox = Hive.isBoxOpen('clients') ? Hive.box<ClientModel>('clients') : null;
 
-    final totalCases = caseBox?.length ?? 0;
-    final totalClients = clientBox?.length ?? 0;
+    
+    
 
     return Scaffold(
-      appBar: AppBar(centerTitle: true,title: Text('Dashboard', style: Tools.oswaldValue(context),), ),
+      appBar: AppBar(centerTitle: true,title: Text('Dashboard', style: Tools.oswaldValue(context).copyWith(color: Colors.white),), ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
@@ -27,22 +28,32 @@ class DashboardView extends StatelessWidget {
             Row(
               children: <Widget>[
                 Expanded(
-                  child: DashboardCard(
-                    title: 'Cases',
-                    value: '$totalCases',
-                    icon: Icons.folder,
-                    onTap: () => Get.toNamed('/cases'),
-                    color: Colors.indigo,
-                  ),
+                  child: ValueListenableBuilder(
+              valueListenable: Hive.box<CaseModel>('cases').listenable(),
+              builder: (context, Box<CaseModel> caseBox, _) {
+                
+                return DashboardCard(
+                      title: 'Cases',
+                      value: '${caseBox.length}',
+                      // icon: Icons.folder,
+                      icon: Icons.gavel,
+                      onTap: () => Get.toNamed('/cases'),
+                      color: Colors.indigo,
+                    );}
+                  )
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: DashboardCard(
-                    title: 'Clients',
-                    value: '$totalClients',
-                    icon: Icons.person,
-                    onTap: () => Get.toNamed('/clients'),
-                    color: Colors.teal,
+                  child: ValueListenableBuilder(
+                                valueListenable: Hive.box<ClientModel>('clients').listenable(),
+                                builder: (context, Box<ClientModel> clientBox, _) {
+                  return DashboardCard(
+                      title: 'Clients',
+                      value: '${clientBox.length}',
+                      icon: Icons.person,
+                      onTap: () => Get.toNamed('/clients'),
+                      color: Colors.teal,
+                    );}
                   ),
                 ),
               ],

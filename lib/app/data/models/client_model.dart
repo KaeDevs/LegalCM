@@ -16,10 +16,18 @@ class ClientModel extends HiveObject {
   @HiveField(3)
   String email;
 
+  @HiveField(4)
+  String city;
+
+  @HiveField(5)
+  String state;
+
   ClientModel({
     required this.id,
     required this.name,
     required this.contactNumber,
     required this.email,
+    required this.city,
+    required this.state,
   });
 }

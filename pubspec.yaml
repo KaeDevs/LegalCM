@@ -37,7 +37,7 @@ dependencies:
   intl:
   table_calendar:
   flutter_local_notifications:
-  file_picker:
+  file_picker: ^10.2.0
   uuid:
   build_runner: ^2.4.8
   hive_generator: ^2.0.1

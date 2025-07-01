@@ -45,7 +45,7 @@ class ClientDetailView extends StatelessWidget {
               backgroundColor: theme.colorScheme.primary,
               child: Text(
                 client.name.isNotEmpty ? client.name[0].toUpperCase() : '?',
-                style: const TextStyle(fontSize: 28, color: Colors.white),
+                style:  TextStyle(fontSize: 28, color: Theme.of(context).colorScheme.inversePrimary,),
               ),
             ),
             const SizedBox(height: 20),
@@ -56,24 +56,24 @@ class ClientDetailView extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               client.email,
-              style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[700]),
+              style: GoogleFonts.poppins(fontSize: 16, color: Theme.of(context).colorScheme.primary,),
             ),
             const SizedBox(height: 8),
             Text(
               client.contactNumber,
-              style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[700]),
+              style: GoogleFonts.poppins(fontSize: 16, color: Theme.of(context).colorScheme.primary,),
             ),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.call),
+                  icon: Icon(Icons.call, color: Theme.of(context).colorScheme.inversePrimary,),
                   label: const Text("Call"),
                   onPressed: () => _makeCall(client.contactNumber),
                 ),
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.email),
+                  icon: Icon(Icons.email,  color: Theme.of(context).colorScheme.inversePrimary,),
                   label: const Text("Email"),
                   onPressed: () => _sendEmail(client.email),
                 ),

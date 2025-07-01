@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
@@ -5,7 +6,6 @@ import 'package:uuid/uuid.dart';
 import '../../data/models/case_model.dart';
 import '../../data/models/client_model.dart';
 import '../clients/add_client_view.dart';
-
 
 class AddCaseView extends StatefulWidget {
   final CaseModel? existingCase;
@@ -22,9 +22,13 @@ class _AddCaseViewState extends State<AddCaseView> {
   final _courtController = TextEditingController();
   final _courtNoController = TextEditingController();
   final _notesController = TextEditingController();
-
+  final _petitionerController = TextEditingController();
+  final _petitionerAdvController = TextEditingController();
+  final _respondentController = TextEditingController();
+  final _respondentAdvController = TextEditingController();
   String _status = 'Pending';
   DateTime _hearingDate = DateTime.now();
+  List<String> _attachedFiles = [];
 
   ClientModel? _selectedClient;
   List<ClientModel> _clients = [];
@@ -42,8 +46,15 @@ class _AddCaseViewState extends State<AddCaseView> {
       _notesController.text = c.notes;
       _status = c.status;
       _hearingDate = c.nextHearing;
+      _petitionerController.text = c.petitioner ?? '';
+      _petitionerAdvController.text = c.petitionerAdv ?? '';
+      _respondentController.text = c.respondent ?? '';
+      _respondentAdvController.text = c.respondentAdv ?? '';
+      _attachedFiles = List<String>.from(c.attachedFiles ?? []);
+
       if (c.clientId != null) {
-        _selectedClient = _clients.firstWhereOrNull((cl) => cl.id == c.clientId);
+        _selectedClient =
+            _clients.firstWhereOrNull((cl) => cl.id == c.clientId);
       }
     }
   }
@@ -56,9 +67,16 @@ class _AddCaseViewState extends State<AddCaseView> {
           ..clientName = _selectedClient!.name
           ..clientId = _selectedClient!.id
           ..court = _courtController.text.trim()
+          ..courtNo = _courtNoController.text.trim()
           ..status = _status
           ..nextHearing = _hearingDate
-          ..notes = _notesController.text.trim();
+          ..notes = _notesController.text.trim()
+          ..petitioner = _petitionerController.text.trim()
+          ..petitionerAdv = _petitionerAdvController.text.trim()
+          ..respondent = _respondentController.text.trim()
+          ..respondentAdv = _respondentAdvController.text.trim()
+          ..attachedFiles = _attachedFiles;
+
         await widget.existingCase!.save();
         Get.back();
         Get.snackbar('Updated', 'Case updated successfully!');
@@ -73,6 +91,10 @@ class _AddCaseViewState extends State<AddCaseView> {
           status: _status,
           nextHearing: _hearingDate,
           notes: _notesController.text.trim(),
+          petitioner: _petitionerController.text.trim(),
+          petitionerAdv: _petitionerAdvController.text.trim(),
+          respondent: _respondentController.text.trim(),
+          respondentAdv: _respondentAdvController.text.trim(),
         );
         await Hive.box<CaseModel>('cases').add(newCase);
         Get.back();
@@ -98,10 +120,25 @@ class _AddCaseViewState extends State<AddCaseView> {
     });
   }
 
+  Future<void> _pickFiles() async {
+    final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result != null) {
+      final files = result.paths.whereType<String>().toList();
+      setState(() {
+        _attachedFiles.addAll(files);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Add New Case')),
+      appBar: AppBar(
+        title: Text(widget.existingCase == null ? 'Add New Case' : 'Edit Case'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -113,6 +150,7 @@ class _AddCaseViewState extends State<AddCaseView> {
                 decoration: const InputDecoration(labelText: 'Case Title'),
                 validator: (value) => value!.isEmpty ? 'Required' : null,
               ),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -126,7 +164,8 @@ class _AddCaseViewState extends State<AddCaseView> {
                           .toList(),
                       onChanged: (val) => setState(() => _selectedClient = val),
                       decoration: const InputDecoration(labelText: 'Client'),
-                      validator: (val) => val == null ? 'Select a client' : null,
+                      validator: (val) =>
+                          val == null ? 'Select a client' : null,
                     ),
                   ),
                   IconButton(
@@ -136,41 +175,117 @@ class _AddCaseViewState extends State<AddCaseView> {
                   )
                 ],
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _courtController,
                 decoration: const InputDecoration(labelText: 'Court'),
               ),
-              TextFormField(
-                controller: _courtNoController,
-                decoration: const InputDecoration(labelText: 'Court No'),
-                keyboardType: TextInputType.number,
+              const SizedBox(height: 16),
+              Row(
+                spacing: 10,
+                children: [
+                  Flexible(
+                    child: TextFormField(
+                      controller: _courtNoController,
+                      decoration: const InputDecoration(labelText: 'Court No'),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  Flexible(
+                    child: DropdownButtonFormField<String>(
+                      value: _status,
+                      items: ['Pending', 'Not Filed', 'Disposed', 'Closed']
+                          .map(
+                              (s) => DropdownMenuItem(value: s, child: Text(s)))
+                          .toList(),
+                      onChanged: (val) => setState(() => _status = val!),
+                      decoration: const InputDecoration(labelText: 'Status'),
+                    ),
+                  ),
+                ],
               ),
-              DropdownButtonFormField<String>(
-                value: _status,
-                items: ['Pending', 'In Progress', 'Closed']
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                    .toList(),
-                onChanged: (val) => setState(() => _status = val!),
-                decoration: const InputDecoration(labelText: 'Status'),
-              ),
+              // const SizedBox(height: 16),
+              const SizedBox(height: 16),
               ListTile(
                 title: const Text('Next Hearing Date'),
                 subtitle: Text(
                   '${_hearingDate.day}/${_hearingDate.month}/${_hearingDate.year}',
+                  style: textTheme.bodyMedium,
                 ),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: _pickDate,
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _notesController,
                 decoration: const InputDecoration(labelText: 'Notes'),
                 maxLines: 3,
               ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _saveCase,
-                icon: const Icon(Icons.save),
-                label: const Text('Save Case'),
+              const SizedBox(height: 24),
+
+              ExpansionTile(
+                title: const Text('Parties'),
+                leading: const Icon(Icons.people),
+                tilePadding: EdgeInsets.zero,
+                childrenPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                children: [
+                  TextFormField(
+                    controller: _petitionerController,
+                    decoration: const InputDecoration(labelText: 'Petitioner'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _petitionerAdvController,
+                    decoration:
+                        const InputDecoration(labelText: 'Petitioner Advocate'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _respondentController,
+                    decoration: const InputDecoration(labelText: 'Respondent'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _respondentAdvController,
+                    decoration:
+                        const InputDecoration(labelText: 'Respondent Advocate'),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Attached Files:',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  ..._attachedFiles.map((file) => ListTile(
+                        title: Text(file.split('/').last),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            setState(() => _attachedFiles.remove(file));
+                          },
+                        ),
+                      )),
+                  ElevatedButton.icon(
+                    onPressed: _pickFiles,
+                    icon: const Icon(Icons.attach_file),
+                    label: const Text('Attach Files'),
+                  ),
+                ],
+              ),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _saveCase,
+                  icon: const Icon(Icons.save),
+                  label: Text(widget.existingCase == null
+                      ? 'Save Case'
+                      : 'Update Case'),
+                ),
               ),
             ],
           ),

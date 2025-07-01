@@ -110,7 +110,7 @@ class CasesView extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _buildStatusChip(c.status, colorScheme),
+                            _buildStatusChip(c.status, colorScheme, Theme.of(context).colorScheme.inversePrimary),
                             Row(
                               children: [
                                 Icon(Icons.calendar_month, size: 16, color: theme.iconTheme.color),
@@ -145,13 +145,16 @@ class CasesView extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusChip(String status, ColorScheme scheme) {
+  Widget _buildStatusChip(String status, ColorScheme scheme, Color color) {
     Color chipColor;
     switch (status) {
       case 'Closed':
         chipColor = Colors.redAccent;
         break;
-      case 'In Progress':
+      case 'Disposed':
+        chipColor = Colors.redAccent;
+        break;
+      case 'Not Filed':
         chipColor = Colors.orange;
         break;
       case 'Pending':
@@ -163,7 +166,7 @@ class CasesView extends StatelessWidget {
     return Chip(
       label: Text(
         status,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: color, fontWeight: FontWeight.w700),
       ),
       backgroundColor: chipColor,
     );

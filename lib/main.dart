@@ -9,6 +9,7 @@ import 'app/theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  // await Hive.box<CaseModel>('cases').clear();
 
 
   Hive.registerAdapter(CaseModelAdapter());

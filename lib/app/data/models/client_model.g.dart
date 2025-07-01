@@ -21,13 +21,15 @@ class ClientModelAdapter extends TypeAdapter<ClientModel> {
       name: fields[1] as String,
       contactNumber: fields[2] as String,
       email: fields[3] as String,
+      city: fields[4] as String,
+      state: fields[5] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, ClientModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -35,7 +37,11 @@ class ClientModelAdapter extends TypeAdapter<ClientModel> {
       ..writeByte(2)
       ..write(obj.contactNumber)
       ..writeByte(3)
-      ..write(obj.email);
+      ..write(obj.email)
+      ..writeByte(4)
+      ..write(obj.city)
+      ..writeByte(5)
+      ..write(obj.state);
   }
 
   @override

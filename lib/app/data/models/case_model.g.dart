@@ -26,13 +26,18 @@ class CaseModelAdapter extends TypeAdapter<CaseModel> {
       nextHearing: fields[6] as DateTime,
       notes: fields[7] as String,
       clientId: fields[8] as String?,
+      petitioner: fields[9] as String?,
+      petitionerAdv: fields[10] as String?,
+      respondent: fields[11] as String?,
+      respondentAdv: fields[12] as String?,
+      attachedFiles: (fields[13] as List?)?.cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, CaseModel obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -50,7 +55,17 @@ class CaseModelAdapter extends TypeAdapter<CaseModel> {
       ..writeByte(7)
       ..write(obj.notes)
       ..writeByte(8)
-      ..write(obj.clientId);
+      ..write(obj.clientId)
+      ..writeByte(9)
+      ..write(obj.petitioner)
+      ..writeByte(10)
+      ..write(obj.petitionerAdv)
+      ..writeByte(11)
+      ..write(obj.respondent)
+      ..writeByte(12)
+      ..write(obj.respondentAdv)
+      ..writeByte(13)
+      ..write(obj.attachedFiles);
   }
 
   @override

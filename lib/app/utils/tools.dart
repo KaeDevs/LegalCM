@@ -19,7 +19,7 @@ class Tools {
       );
 
   static TextStyle H3(BuildContext context) { 
-    final textScale = MediaQuery.of(context).textScaleFactor;
+    // final textScale = MediaQuery.of(context).textScaleFactor;
     return TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.w900,
