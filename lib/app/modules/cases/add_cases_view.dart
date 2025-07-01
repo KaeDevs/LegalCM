@@ -6,6 +6,10 @@ import 'package:uuid/uuid.dart';
 import '../../data/models/case_model.dart';
 import '../../data/models/client_model.dart';
 import '../clients/add_client_view.dart';
+import 'dart:io';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+
 
 class AddCaseView extends StatefulWidget {
   final CaseModel? existingCase;
@@ -61,6 +65,13 @@ class _AddCaseViewState extends State<AddCaseView> {
 
   void _saveCase() async {
     if (_formKey.currentState!.validate() && _selectedClient != null) {
+      if (_attachedFiles.isNotEmpty) {
+        // Text('${_attachedFiles.length} files attached');}
+        print("Attached");
+      } else {
+        print("Not Attached");
+      }
+
       if (widget.existingCase != null) {
         widget.existingCase!
           ..title = _titleController.text.trim()
@@ -78,7 +89,8 @@ class _AddCaseViewState extends State<AddCaseView> {
           ..attachedFiles = _attachedFiles;
 
         await widget.existingCase!.save();
-        Get.back();
+        Get.back(result: 'updated');
+
         Get.snackbar('Updated', 'Case updated successfully!');
       } else {
         final newCase = CaseModel(
@@ -95,9 +107,11 @@ class _AddCaseViewState extends State<AddCaseView> {
           petitionerAdv: _petitionerAdvController.text.trim(),
           respondent: _respondentController.text.trim(),
           respondentAdv: _respondentAdvController.text.trim(),
+          attachedFiles: _attachedFiles
         );
         await Hive.box<CaseModel>('cases').add(newCase);
-        Get.back();
+        Get.back(result: 'updated');
+
         Get.snackbar('Success', 'Case added successfully!');
       }
     }
@@ -121,14 +135,32 @@ class _AddCaseViewState extends State<AddCaseView> {
   }
 
   Future<void> _pickFiles() async {
-    final result = await FilePicker.platform.pickFiles(allowMultiple: true);
-    if (result != null) {
-      final files = result.paths.whereType<String>().toList();
-      setState(() {
-        _attachedFiles.addAll(files);
-      });
+  final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+  if (result != null) {
+    final files = result.paths.whereType<String>().toList();
+    final localPaths = await saveFilesToLocalStorage(files);
+    setState(() {
+      _attachedFiles.addAll(localPaths);
+    });
+  }
+}
+
+
+  
+Future<List<String>> saveFilesToLocalStorage(List<String> paths) async {
+  final List<String> copiedPaths = [];
+  final appDir = await getApplicationDocumentsDirectory();
+
+  for (final originalPath in paths) {
+    final file = File(originalPath);
+    if (await file.exists()) {
+      final newPath = p.join(appDir.path, p.basename(originalPath));
+      await file.copy(newPath);
+      copiedPaths.add(newPath);
     }
   }
+  return copiedPaths;
+}
 
   @override
   Widget build(BuildContext context) {
@@ -224,8 +256,8 @@ class _AddCaseViewState extends State<AddCaseView> {
               const SizedBox(height: 24),
 
               ExpansionTile(
-                title: const Text('Parties'),
-                leading: const Icon(Icons.people),
+                title: Text('Parties',style:  Theme.of(context).textTheme.titleMedium),
+                leading: Icon(Icons.people, color: Theme.of(context).colorScheme.primary,),
                 tilePadding: EdgeInsets.zero,
                 childrenPadding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -254,28 +286,37 @@ class _AddCaseViewState extends State<AddCaseView> {
                   const SizedBox(height: 12),
                 ],
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Attached Files:',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  ..._attachedFiles.map((file) => ListTile(
-                        title: Text(file.split('/').last),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () {
-                            setState(() => _attachedFiles.remove(file));
-                          },
-                        ),
-                      )),
-                  ElevatedButton.icon(
-                    onPressed: _pickFiles,
-                    icon: const Icon(Icons.attach_file),
-                    label: const Text('Attach Files'),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                  title: Row(
+                    spacing: 10,
+                    children: [
+                      Icon(Icons.attach_file,
+                          color: Theme.of(context).colorScheme.primary),
+                      Text('Attached Files:',
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ],
                   ),
-                ],
-              ),
+                  children: [
+                    
+                        const SizedBox(height: 8),
+                        ..._attachedFiles.map((file) => ListTile(
+                              title: Text(file.split('/').last),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () {
+                                  setState(() => _attachedFiles.remove(file));
+                                },
+                              ),
+                            )),
+                        ElevatedButton.icon(
+                          onPressed: _pickFiles,
+                          icon:  Icon(Icons.attach_file, color: Theme.of(context).colorScheme.inversePrimary,),
+                          label: const Text('Attach Files'),
+                        ),
+                     
+                    
+                  ]),
 
               SizedBox(
                 width: double.infinity,

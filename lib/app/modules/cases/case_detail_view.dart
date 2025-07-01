@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:legalcm/app/modules/cases/add_cases_view.dart';
 import '../../data/models/case_model.dart';
+import 'package:open_file/open_file.dart';
 
 class CaseDetailView extends StatelessWidget {
   final CaseModel caseData;
@@ -33,7 +34,14 @@ class CaseDetailView extends StatelessWidget {
   }
 
   void _editCase() {
-    Get.to(() => AddCaseView(existingCase: caseData));
+    Get.off(() => AddCaseView(existingCase: caseData))!.then((result) {
+  if (result == 'updated') {
+    print("should go back to tab");
+    Get.back(); // Now this pops CaseDetailView
+  }
+
+});
+
   }
 
   @override
@@ -42,7 +50,6 @@ class CaseDetailView extends StatelessWidget {
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      
       appBar: AppBar(title: const Text('Case Details')),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -83,41 +90,45 @@ class CaseDetailView extends StatelessWidget {
                 ExpansionTile(
                     title: Text('Parties', style: textTheme.titleMedium),
                     children: [
-
-                const SizedBox(height: 3),
-                if (caseData.petitioner != null &&
-                    caseData.petitioner!.isNotEmpty)
-                  _buildDetailRow(
-                      Icons.person, 'Petitioner', caseData.petitioner!),
-                if (caseData.petitionerAdv != null &&
-                    caseData.petitionerAdv!.isNotEmpty)
-                  _buildDetailRow(
-                      Icons.gavel, 'Petitioner Adv.', caseData.petitionerAdv!),
-                if (caseData.respondent != null &&
-                    caseData.respondent!.isNotEmpty)
-                  _buildDetailRow(
-                      Icons.person_outline, 'Respondent', caseData.respondent!),
-                if (caseData.respondentAdv != null &&
-                    caseData.respondentAdv!.isNotEmpty)
-                  _buildDetailRow(Icons.gavel_outlined, 'Respondent Adv.',
-                      caseData.respondentAdv!),
-                const SizedBox(height: 3),
+                      const SizedBox(height: 3),
+                      if (caseData.petitioner != null &&
+                          caseData.petitioner!.isNotEmpty)
+                        _buildDetailRow(
+                            Icons.person, 'Petitioner', caseData.petitioner!),
+                      if (caseData.petitionerAdv != null &&
+                          caseData.petitionerAdv!.isNotEmpty)
+                        _buildDetailRow(Icons.gavel, 'Petitioner Adv.',
+                            caseData.petitionerAdv!),
+                      if (caseData.respondent != null &&
+                          caseData.respondent!.isNotEmpty)
+                        _buildDetailRow(Icons.person_outline, 'Respondent',
+                            caseData.respondent!),
+                      if (caseData.respondentAdv != null &&
+                          caseData.respondentAdv!.isNotEmpty)
+                        _buildDetailRow(Icons.gavel_outlined, 'Respondent Adv.',
+                            caseData.respondentAdv!),
+                      const SizedBox(height: 3),
                     ]),
-                    if (caseData.attachedFiles != null && caseData.attachedFiles!.isNotEmpty)
-  Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text('Attachments:', style: Theme.of(context).textTheme.titleMedium),
-      const SizedBox(height: 8),
-      ...caseData.attachedFiles!.map((path) => ListTile(
-        title: Text(path.split('/').last),
-        onTap: () {
-          // Open or preview file using url_launcher or open_file
-        },
-      )),
-    ],
-  ),
-
+                if (caseData.attachedFiles != null &&
+                    caseData.attachedFiles!.isNotEmpty)
+                  ExpansionTile(
+                    // crossAxisAlignment: CrossAxisAlignment.start,
+                    title: 
+                      Text('Attachments:',
+                          style: Theme.of(context).textTheme.titleMedium),
+                    children: [
+                      const SizedBox(height: 8),
+                      ...caseData.attachedFiles!.map((path) => ListTile(
+                            title: Text(path.split('/').last),
+                            onTap: () async {
+                              final result = await OpenFile.open(path);
+                              if (result.type != ResultType.done) {
+                                Get.snackbar("Error", "Could not open file");
+                              }
+                            },
+                          )),
+                    ],
+                  ),
                 const Spacer(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,

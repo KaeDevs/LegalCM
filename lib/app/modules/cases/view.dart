@@ -12,6 +12,7 @@ class CasesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final caseBox = Hive.box<CaseModel>('cases');
+    
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -59,7 +60,9 @@ class CasesView extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 child: InkWell(
-                  onTap: () => Get.to(() => CaseDetailView(caseData: c)),
+                  
+                  onTap: () {
+                    Get.to(() => CaseDetailView(caseData: c));},
                   borderRadius: BorderRadius.circular(16),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
