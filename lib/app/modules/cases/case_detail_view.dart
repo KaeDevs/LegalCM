@@ -36,7 +36,7 @@ class CaseDetailView extends StatelessWidget {
   void _editCase() {
     Get.off(() => AddCaseView(existingCase: caseData))!.then((result) {
   if (result == 'updated') {
-    print("should go back to tab");
+    // print("should go back to tab");
     Get.back(); // Now this pops CaseDetailView
   }
 
