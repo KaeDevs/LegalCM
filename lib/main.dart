@@ -41,9 +41,9 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'Legal Case Manager',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme, // 🌞 Light theme
-      darkTheme: AppTheme.darkTheme, // 🌚 Dark theme
-      themeMode: ThemeMode.system, // 🌓 Follow system setting
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme, 
+      themeMode: ThemeMode.system, 
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
     );

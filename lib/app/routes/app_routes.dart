@@ -8,7 +8,9 @@ import '../modules/billing/billing_overview_view.dart';
 import '../modules/billing/expense/add_expense_view.dart';
 import '../modules/billing/invoice/addInvoiceView.dart';
 import '../modules/billing/timeEntry/timeEntryListView.dart';
+import '../modules/cases/case_binding.dart';
 import '../modules/clients/add_client_view.dart';
+import '../modules/clients/client_binding.dart';
 import '../modules/dashboard/view.dart';
 import '../modules/cases/view.dart';
 
@@ -25,9 +27,9 @@ class AppPages {
         name: '/dashboard',
         page: () => const DashboardView(),
         binding: dashBoardBinding()),
-    GetPage(name: '/cases', page: () => const CasesView()),
+    GetPage(name: '/cases', page: () => const CasesView(), binding: CaseBinding()),
     GetPage(name: '/add-case', page: () => const AddCaseView()),
-    GetPage(name: '/clients', page: () => const ClientsView()),
+    GetPage(name: '/clients', page: () => const ClientsView(), binding: ClientBinding()),
     GetPage(name: '/add-client', page: () => AddClientView()),
     GetPage(name: '/calendar', page: () => const CalendarView()),
     GetPage(name: '/tasks', page: () => TaskListView()),

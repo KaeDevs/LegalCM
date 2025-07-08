@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../data/models/task_model.dart';
 import 'task_controller.dart';
 import 'task_detail_view.dart';
 
@@ -26,8 +25,8 @@ class TaskListView extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                colorScheme.primary.withOpacity(0.9),
-                colorScheme.secondary.withOpacity(0.9),
+                colorScheme.primary.withAlpha((0.9 * 255).toInt()), 
+                colorScheme.secondary.withAlpha((0.9 * 255).toInt()),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -58,7 +57,7 @@ class TaskListView extends StatelessWidget {
               ),
               elevation: 2,
               color: t.isCompleted
-                  ? colorScheme.surfaceVariant.withOpacity(0.6)
+                  ? colorScheme.surfaceContainerHighest.withAlpha((0.6 * 255).toInt() )
                   : theme.cardColor,
               child: ListTile(
                 contentPadding:

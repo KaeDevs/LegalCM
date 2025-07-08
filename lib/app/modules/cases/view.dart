@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:legalcm/app/modules/cases/controller.dart';
 
 import '../../data/models/case_model.dart';
 import 'case_detail_view.dart';
@@ -11,8 +12,7 @@ class CasesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final caseBox = Hive.box<CaseModel>('cases');
-    
+    final controller = Get.put(CasesController());
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -34,109 +34,155 @@ class CasesView extends StatelessWidget {
             ),
           ),
         ),
+        actions: [
+          Obx(() => IconButton(
+            icon: Icon(controller.showAdvancedFilters.value 
+                ? Icons.filter_list_off 
+                : Icons.filter_list),
+            onPressed: controller.toggleAdvancedFilters,
+          )),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.sort),
+            onSelected: controller.updateSortBy,
+            itemBuilder: (context) => controller.sortOptions.map((option) {
+              return PopupMenuItem<String>(
+                value: option,
+                child: Obx(() => Row(
+                  children: [
+                    Text(option),
+                    const Spacer(),
+                    if (controller.sortBy.value == option) ...[
+                      Icon(controller.sortAscending.value 
+                          ? Icons.arrow_upward 
+                          : Icons.arrow_downward,
+                        size: 16,
+                      ),
+                    ],
+                  ],
+                )),
+              );
+            }).toList(),
+          ),
+        ],
       ),
-      body: ValueListenableBuilder(
-        valueListenable: caseBox.listenable(),
-        builder: (context, Box<CaseModel> box, _) {
-          if (box.isEmpty) {
-            return Center(
-              child: Text(
-                'No cases found.',
-                style: GoogleFonts.poppins(fontSize: 18, color: theme.hintColor),
+      body: Column(
+        children: [
+          // Search Bar
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: controller.searchController,
+              decoration: InputDecoration(
+                hintText: 'Search cases, clients, courts...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: controller.clearSearch,
+                      )
+                    : const SizedBox.shrink()),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: theme.cardColor,
               ),
-            );
-          }
+            ),
+          ),
 
-          final cases = box.values.toList().cast<CaseModel>();
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            itemCount: cases.length,
-            itemBuilder: (context, index) {
-              final c = cases[index];
-              return Card(
-                elevation: 3,
-                color: theme.cardColor,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                child: InkWell(
-                  
-                  onTap: () {
-                    Get.to(() => CaseDetailView(caseData: c));},
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          c.title,
-                          style: GoogleFonts.oswald(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: theme.textTheme.titleLarge!.color,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Icon(Icons.person, size: 16, color: theme.iconTheme.color),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                c.clientName,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  color: theme.textTheme.bodyMedium!.color,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.account_balance, size: 16, color: theme.iconTheme.color),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                c.court,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  color: theme.textTheme.bodyMedium!.color,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _buildStatusChip(c.status, colorScheme, Theme.of(context).colorScheme.inversePrimary),
-                            Row(
-                              children: [
-                                Icon(Icons.calendar_month, size: 16, color: theme.iconTheme.color),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${c.nextHearing.day}/${c.nextHearing.month}/${c.nextHearing.year}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    color: theme.textTheme.bodySmall!.color,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+          // Quick Stats
+          Obx(() => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Showing ${controller.filteredCount} of ${controller.totalCases} cases',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: theme.textTheme.bodyMedium?.color,
                   ),
                 ),
-              );
-            },
-          );
-        },
+                if (controller.searchQuery.value.isNotEmpty ||
+                    controller.selectedStatus.value != 'All' ||
+                    controller.dateRange.value != null)
+                  TextButton(
+                    onPressed: controller.clearFilters,
+                    child: const Text('Clear Filters'),
+                  ),
+              ],
+            ),
+          )),
+
+          // Advanced Filters
+          Obx(() => AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: controller.showAdvancedFilters.value ? null : 0,
+            child: controller.showAdvancedFilters.value
+                ? _buildAdvancedFilters(controller, theme)
+                : const SizedBox.shrink(),
+          )),
+
+          // Status Filter Chips
+          Container(
+            height: 50,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Obx(() => ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: controller.statusOptions.length,
+              itemBuilder: (context, index) {
+                final status = controller.statusOptions[index];
+                final isSelected = controller.selectedStatus.value == status;
+                final count = status == 'All' 
+                    ? controller.totalCases 
+                    : controller.casesByStatus[status] ?? 0;
+                
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text('$status ($count)'),
+                    selected: isSelected,
+                    onSelected: (_) => controller.updateStatusFilter(status),
+                    selectedColor: colorScheme.primary.withOpacity(0.2),
+                    checkmarkColor: colorScheme.primary,
+                  ),
+                );
+              },
+            )),
+          ),
+
+          // Cases List
+          Expanded(
+            child: ValueListenableBuilder(
+              valueListenable: Hive.box<CaseModel>('cases').listenable(),
+              builder: (context, Box<CaseModel> box, _) {
+                return Obx(() {
+                  final cases = controller.filteredCases;
+                  
+                  if (controller.totalCases == 0) {
+                    return _buildEmptyState('No cases found.', 'Start by adding your first case');
+                  }
+                  
+                  if (cases.isEmpty) {
+                    return _buildEmptyState(
+                      'No cases match your search', 
+                      'Try adjusting your filters or search terms'
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    itemCount: cases.length,
+                    itemBuilder: (context, index) {
+                      final c = cases[index];
+                      return _buildCaseCard(c, theme, context);
+                    },
+                  );
+                });
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Get.toNamed('/add-case'),
@@ -144,6 +190,201 @@ class CasesView extends StatelessWidget {
         label: const Text('Add Case'),
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
+      ),
+    );
+  }
+
+  Widget _buildAdvancedFilters(CasesController controller, ThemeData theme) {
+    return Card(
+      margin: const EdgeInsets.all(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Advanced Filters',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Date Range Filter
+            Row(
+              children: [
+                Expanded(
+                  child: Obx(() => OutlinedButton.icon(
+                    onPressed: () => _showDateRangePicker(controller),
+                    icon: const Icon(Icons.date_range),
+                    label: Text(
+                      controller.dateRange.value == null
+                          ? 'Select Date Range'
+                          : '${controller.dateRange.value!.start.day}/${controller.dateRange.value!.start.month} - ${controller.dateRange.value!.end.day}/${controller.dateRange.value!.end.month}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  )),
+                ),
+                const SizedBox(width: 8),
+                Obx(() => controller.dateRange.value != null
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => controller.updateDateRange(null),
+                      )
+                    : const SizedBox.shrink()),
+              ],
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // Quick Filter Buttons
+            Wrap(
+              spacing: 8,
+              children: [
+                ActionChip(
+                  label: const Text('Upcoming Hearings'),
+                  onPressed: controller.filterUpcomingHearings,
+                  avatar: const Icon(Icons.schedule, size: 16),
+                ),
+                ActionChip(
+                  label: const Text('Overdue Hearings'),
+                  onPressed: controller.filterOverdueHearings,
+                  avatar: const Icon(Icons.warning, size: 16),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showDateRangePicker(CasesController controller) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: Get.context!,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      initialDateRange: controller.dateRange.value,
+    );
+    
+    if (picked != null) {
+      controller.updateDateRange(picked);
+    }
+  }
+
+  Widget _buildEmptyState(String title, String subtitle) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.folder_open,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey[500],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCaseCard(CaseModel c, ThemeData theme, BuildContext context) {
+    return Card(
+      elevation: 3,
+      color: theme.cardColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: InkWell(
+        onTap: () {
+          Get.to(() => CaseDetailView(caseData: c));
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                c.title,
+                style: GoogleFonts.oswald(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: theme.textTheme.titleLarge!.color,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(Icons.person, size: 16, color: theme.iconTheme.color),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      c.clientName,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: theme.textTheme.bodyMedium!.color,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.account_balance, size: 16, color: theme.iconTheme.color),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      c.court,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: theme.textTheme.bodyMedium!.color,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildStatusChip(c.status, theme.colorScheme, theme.colorScheme.inversePrimary),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_month, size: 16, color: theme.iconTheme.color),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${c.nextHearing.day}/${c.nextHearing.month}/${c.nextHearing.year}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: theme.textTheme.bodySmall!.color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

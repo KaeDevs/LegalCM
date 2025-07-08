@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:collection/collection.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:legalcm/app/utils/tools.dart';
 
 import '../../../data/models/expense_model.dart';
 import '../../../data/models/case_model.dart';
@@ -15,18 +14,10 @@ class ExpenseListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Expenses",
-          style: textTheme.titleLarge?.copyWith(
-            color: colorScheme.onPrimary,
-          ),
-        ),
-        elevation: 1,
+        title: Text("Expenses", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
       ),
       body: ValueListenableBuilder(
         valueListenable: Hive.box<ExpenseModel>('expenses').listenable(),
@@ -41,10 +32,8 @@ class ExpenseListView extends StatelessWidget {
           if (grouped.isEmpty) {
             return Center(
               child: Text(
-                "No expenses recorded yet.",
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.6),
-                ),
+                "No expenses recorded yet",
+                style: GoogleFonts.poppins(fontSize: 16, color: theme.hintColor),
               ),
             );
           }
@@ -68,94 +57,62 @@ class ExpenseListView extends StatelessWidget {
               );
 
               return Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 3,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 4,
                 color: theme.cardColor,
                 child: Theme(
-                  data: theme.copyWith(
-                    dividerColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                  ),
+                  data: theme.copyWith(dividerColor: Colors.transparent),
                   child: ExpansionTile(
+                    visualDensity: VisualDensity.adaptivePlatformDensity,
+                    tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     title: Text(
                       caseTitle,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 20),
                     ),
-                    subtitle: Text(
-                      "Total: ₹${totalAmount.toStringAsFixed(2)}",
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: colorScheme.secondary,
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        "Total: ₹${totalAmount.toStringAsFixed(2)}",
+                        style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w600),
                       ),
                     ),
                     children: expenses.map((expense) {
                       return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                        visualDensity: VisualDensity.adaptivePlatformDensity,
                         title: Text(
                           expense.title,
-                          style: textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
                         ),
                         subtitle: Text(
                           "${expense.date.toLocal().toString().split(" ")[0]}",
-                          style: textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
-                          ),
+                          style: GoogleFonts.poppins(fontSize: 15),
                         ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "₹${expense.amount.toStringAsFixed(2)}",
-                              style: Tools.oswaldValue(context).copyWith(
-                                color: colorScheme.inverseSurface,
-                                fontSize: textTheme.bodyLarge?.fontSize,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () async {
-                                final confirm = await Get.dialog<bool>(
-                                  AlertDialog(
-                                    title: Text(
-                                      "Delete Expense",
-                                      style: textTheme.titleMedium,
-                                    ),
-                                    content: Text(
-                                      "Are you sure you want to delete this expense?",
-                                      style: textTheme.bodyMedium,
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Get.back(result: false),
-                                        child: Text("Cancel",
-                                            style: textTheme.labelLarge),
-                                      ),
-                                      TextButton(
-                                        onPressed: () =>
-                                            Get.back(result: true),
-                                        child: Text(
-                                          "Delete",
-                                          style: textTheme.labelLarge?.copyWith(
-                                              color: Colors.red),
-                                        ),
-                                      ),
-                                    ],
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.redAccent),
+                          onPressed: () async {
+                            final confirm = await Get.dialog<bool>(
+                              AlertDialog(
+                                title: const Text("Delete Expense"),
+                                content: const Text("Are you sure you want to delete this expense?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Get.back(result: false),
+                                    child: const Text("Cancel"),
                                   ),
-                                );
+                                  TextButton(
+                                    onPressed: () => Get.back(result: true),
+                                    child: const Text("Delete"),
+                                  ),
+                                ],
+                              ),
+                            );
 
-                                if (confirm == true) {
-                                  await expense.delete();
-                                  Get.snackbar("Deleted", "Expense removed");
-                                }
-                              },
-                            ),
-                          ],
+                            if (confirm == true) {
+                              await expense.delete();
+                              Get.snackbar("Deleted", "Expense removed");
+                            }
+                          },
                         ),
                       );
                     }).toList(),
@@ -169,13 +126,7 @@ class ExpenseListView extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Get.toNamed('/add-expense'),
         icon: const Icon(Icons.add),
-        label: Text(
-          "Add Expense",
-          style: textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: colorScheme.onPrimary,
-          ),
-        ),
+        label: const Text("Add Expense"),
       ),
     );
   }

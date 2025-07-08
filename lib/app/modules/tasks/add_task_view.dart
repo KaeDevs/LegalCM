@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:uuid/uuid.dart';
 import '../../data/models/task_model.dart';
 import '../../data/models/case_model.dart';
 import '../../services/notification_service.dart';

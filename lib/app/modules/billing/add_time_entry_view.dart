@@ -55,7 +55,7 @@ class _AddTimeEntryViewState extends State<AddTimeEntryView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    // final theme = Theme.of(context);
     final caseBox = Hive.box<CaseModel>('cases');
 
     return Scaffold(

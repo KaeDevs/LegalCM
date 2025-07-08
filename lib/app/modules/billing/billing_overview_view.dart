@@ -8,7 +8,7 @@ class BillingOverviewView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
+    // final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
@@ -17,11 +17,25 @@ class BillingOverviewView extends StatelessWidget {
           "Billing",
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
-            
+            color: colorScheme.onPrimary
+          ),
+          
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                colorScheme.primary.withAlpha((0.9 * 255).toInt()),
+                colorScheme.secondary.withAlpha((0.9 * 255).toInt()),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
         ),
         elevation: 1,
         backgroundColor: theme.appBarTheme.backgroundColor,
+        iconTheme: IconThemeData(color: colorScheme.onPrimary),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -47,7 +61,7 @@ class BillingOverviewView extends StatelessWidget {
           _buildBillingTile(
             context,
             icon: Icons.picture_as_pdf,
-            iconColor: colorScheme.tertiary ?? colorScheme.primary,
+            iconColor: colorScheme.tertiary,
             title: "Invoices",
             subtitle: "Generate and view invoices",
             onTap: () => Get.toNamed('/invoice-list'),
@@ -68,7 +82,7 @@ class BillingOverviewView extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final cardColor = theme.cardColor;
-    final iconBackground = theme.colorScheme.surfaceVariant.withOpacity(0.5);
+    final iconBackground = theme.colorScheme.surfaceContainerHighest.withAlpha((0.5 * 255).toInt());
 
     return Material(
       elevation: 2,
@@ -97,7 +111,7 @@ class BillingOverviewView extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w400,
-            color: textTheme.bodySmall?.color?.withOpacity(0.7),
+            color: textTheme.bodySmall?.color?.withAlpha((0.7 * 255).toInt()),
           ),
         ),
         onTap: onTap,

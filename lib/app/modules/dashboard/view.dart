@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:legalcm/app/modules/about/view.dart';
 import 'package:legalcm/app/utils/tools.dart';
 import '../../data/models/case_model.dart';
 import '../../data/models/client_model.dart';
@@ -26,11 +28,29 @@ class DashboardView extends StatelessWidget {
           'Dashboard',
           style: Tools.oswaldValue(context).copyWith(color: Colors.white),
         ),
+        actions: [
+          
+          PopupMenuButton(icon: Icon(Icons.more_vert),
+          onSelected: (value) {
+            if(value == 'About'){
+              Get.to(AboutPage());
+            }else{
+              SystemNavigator.pop();
+            }
+          
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(value: 'About', child: Text('About')),
+            PopupMenuItem(value: 'Exit', child: Text('Exit')),
+          ]
+          )
+  
+        ]
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
-          children: [
+          children : [
             Row(
               spacing: 16,
               children: <Widget>[

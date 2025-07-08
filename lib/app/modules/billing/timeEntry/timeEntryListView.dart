@@ -14,10 +14,25 @@ class TimeEntryListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text("⏱ Time Entries", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+        title: Text("Time Entries", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: colorScheme.onPrimary)),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                colorScheme.primary.withOpacity(0.9),
+                colorScheme.secondary.withOpacity(0.9),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        elevation: 1,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        iconTheme: IconThemeData(color: colorScheme.onPrimary),
       ),
       body: ValueListenableBuilder(
         valueListenable: Hive.box<TimeEntryModel>('time_entries').listenable(),
