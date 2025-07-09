@@ -18,7 +18,16 @@ class TaskDetailView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Task Details"),
+        title: Text(
+          "Task Details",
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onPrimary,
+            letterSpacing: 0.5,
+            fontFamily: 'poppins]',
+          ),
+        ),
+      
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         elevation: 3,

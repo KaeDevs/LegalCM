@@ -127,11 +127,11 @@ class _AddTaskViewState extends State<AddTaskView> {
                 }).toList(),
                 onChanged: (val) => setState(() => _selectedCaseId = val),
               ),
-              SwitchListTile(
-                value: _hasReminder,
-                onChanged: (val) => setState(() => _hasReminder = val),
-                title: const Text("Enable Reminder"),
-              ),
+              // SwitchListTile(
+              //   value: _hasReminder,
+              //   onChanged: (val) => setState(() => _hasReminder = val),
+              //   title: const Text("Enable Reminder"),
+              // ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: _saveTask,

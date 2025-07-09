@@ -56,14 +56,15 @@ class ClientsView extends StatelessWidget {
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
-              if (value == 'export') {
-                _exportClients(controller);
-              } else if (value == 'recent') {
+              // if (value == 'export') {
+              //   // _exportClients(controller);
+              // } else 
+              if (value == 'recent') {
                 _showRecentClients(controller);
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'export', child: Text('Export CSV')),
+              // const PopupMenuItem(value: 'export', child: Text('Export CSV')),
               const PopupMenuItem(
                   value: 'recent', child: Text('Recent Clients')),
             ],
@@ -135,7 +136,7 @@ class ClientsView extends StatelessWidget {
               valueListenable: Hive.box<ClientModel>('clients').listenable(),
               builder: (context, Box<ClientModel> box, _) {
                 return Obx(() {
-                  final clients = controller.filteredClients;
+                  final clients = controller.filteredClients.value;
 
                   if (controller.totalClients == 0) {
                     return _buildEmptyState(
@@ -419,15 +420,15 @@ class ClientsView extends StatelessWidget {
     );
   }
 
-  void _exportClients(ClientsController controller) {
-    final csvData = controller.exportClientsToCSV();
-    // You can implement file saving logic here
-    Get.snackbar(
-      'Export',
-      'CSV data generated successfully',
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  }
+  // void _exportClients(ClientsController controller) {
+  //   final csvData = controller.exportClientsToCSV();
+  //   // You can implement file saving logic here
+  //   Get.snackbar(
+  //     'Export',
+  //     'CSV data generated successfully',
+  //     snackPosition: SnackPosition.BOTTOM,
+  //   );
+  // }
 
   void _showRecentClients(ClientsController controller) {
     final recentClients = controller.getRecentClients();

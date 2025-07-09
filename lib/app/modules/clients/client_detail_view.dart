@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -39,6 +40,7 @@ class ClientDetailView extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          spacing: 8,
           children: [
             CircleAvatar(
               radius: 40,
@@ -53,17 +55,64 @@ class ClientDetailView extends StatelessWidget {
               client.name,
               style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      client.email,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.copy, size: 16),
+                      tooltip: 'Copy Email',
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: client.email));
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   const SnackBar(content: Text('Email copied to clipboard')),
+                        // );
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 0), // Reduced space between rows
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      client.contactNumber,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.copy, size: 16),
+                      tooltip: 'Copy Number',
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: client.contactNumber));
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   const SnackBar(content: Text('Contact number copied to clipboard')),
+                        // );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
             Text(
-              client.email,
+              "City: ${client.city}",
+              style: GoogleFonts.poppins(fontSize: 16, color: Theme.of(context).colorScheme.primary,),
+            ),
+            Text(
+              "State: ${client.state}",
               style: GoogleFonts.poppins(fontSize: 16, color: Theme.of(context).colorScheme.primary,),
             ),
             const SizedBox(height: 8),
-            Text(
-              client.contactNumber,
-              style: GoogleFonts.poppins(fontSize: 16, color: Theme.of(context).colorScheme.primary,),
-            ),
-            const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [

@@ -38,7 +38,8 @@ class _CalendarViewState extends State<CalendarView> {
     final Map<DateTime, List<CaseModel>> caseEvents = {};
 
     for (var c in cases) {
-      final date = DateTime(c.nextHearing.year, c.nextHearing.month, c.nextHearing.day);
+      final date =
+          DateTime(c.nextHearing.year, c.nextHearing.month, c.nextHearing.day);
       caseEvents.putIfAbsent(date, () => []).add(c);
     }
 
@@ -47,7 +48,8 @@ class _CalendarViewState extends State<CalendarView> {
     final Map<DateTime, List<TaskModel>> taskEvents = {};
 
     for (var task in tasks) {
-      final date = DateTime(task.dueDate.year, task.dueDate.month, task.dueDate.day);
+      final date =
+          DateTime(task.dueDate.year, task.dueDate.month, task.dueDate.day);
       taskEvents.putIfAbsent(date, () => []).add(task);
     }
 
@@ -102,7 +104,7 @@ class _CalendarViewState extends State<CalendarView> {
                 shape: BoxShape.circle,
               ),
               markerDecoration: BoxDecoration(
-                color: theme.colorScheme.secondary,
+                color: theme.colorScheme.primary.withAlpha((0.2 * 255).toInt()),
                 shape: BoxShape.circle,
               ),
               markersAlignment: Alignment.bottomCenter,
@@ -115,56 +117,101 @@ class _CalendarViewState extends State<CalendarView> {
               titleCentered: true,
               titleTextFormatter: (date, locale) =>
                   DateFormat('MMMM yyyy').format(date),
-              leftChevronIcon: Icon(Icons.chevron_left, color: theme.colorScheme.primary),
-              rightChevronIcon: Icon(Icons.chevron_right, color: theme.colorScheme.primary),
+              leftChevronIcon:
+                  Icon(Icons.chevron_left, color: theme.colorScheme.primary),
+              rightChevronIcon:
+                  Icon(Icons.chevron_right, color: theme.colorScheme.primary),
             ),
             calendarBuilders: CalendarBuilders(
               markerBuilder: (context, date, events) {
                 if (events.isNotEmpty) {
                   final cases = _getCasesForDay(date);
                   final tasks = _getTasksForDay(date);
-                  
-                  return Positioned(
-                    bottom: 4,
-                    child: Row(
+
+                  // If this date is selected, use the selected style, otherwise show markers as before
+                  if (isSameDay(_selectedDay, date)) {
+                    // Use the same style as selectedBuilder
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${date.day}',
+                        style: TextStyle(
+                          color: theme.colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                  }
+                  // Only show one type of marker: cases if present, otherwise tasks
+                  if (cases.isNotEmpty) {
+                    return Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Case markers (blue)
-                        ...List.generate(
-                          cases.length > 2 ? 2 : cases.length,
-                          (index) => Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 1.0),
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: theme.colorScheme.primary,
+                      mainAxisSize: MainAxisSize.max,
+                      children: List.generate(
+                        cases.length > 2 ? 2 : cases.length,
+                        (index) => Expanded(
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.secondary,
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                '${date.day}',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                        // Task markers (secondary color)
-                        ...List.generate(
-                          tasks.length > 2 ? 2 : tasks.length,
-                          (index) => Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 1.0),
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: theme.colorScheme.secondary,
+                      ),
+                    );
+                  } else if (tasks.isNotEmpty) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: List.generate(
+                        tasks.length > 2 ? 2 : tasks.length,
+                        (index) => Expanded(
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 1.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: theme.colorScheme.secondary.withAlpha((0.2 * 255).toInt()),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                '${date.day}',
+                                style: TextStyle(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  );
+                      ),
+                    );
+                  }
+                  return null;
                 }
                 return null;
               },
               todayBuilder: (context, date, _) {
                 return Container(
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withAlpha((0.2 * 255).toInt()),
+                    color: theme.colorScheme.primary
+                        .withAlpha((0.2 * 255).toInt()),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -213,135 +260,144 @@ class _CalendarViewState extends State<CalendarView> {
                 return ValueListenableBuilder(
                   valueListenable: taskBox.listenable(),
                   builder: (context, Box<TaskModel> taskBoxValue, __) {
-                final cases = _getCasesForDay(_selectedDay ?? DateTime.now());
-                final tasks = _getTasksForDay(_selectedDay ?? DateTime.now());
+                    final cases =
+                        _getCasesForDay(_selectedDay ?? DateTime.now());
+                    final tasks =
+                        _getTasksForDay(_selectedDay ?? DateTime.now());
 
-                if (cases.isEmpty && tasks.isEmpty) {
-                  return const Center(child: Text('No events on this day.'));
-                }
+                    if (cases.isEmpty && tasks.isEmpty) {
+                      return const Center(
+                          child: Text('No events on this day.'));
+                    }
 
-                return ListView(
-                  children: [
-                    // Cases Section
-                    if (cases.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Icon(Icons.gavel, 
-                                 color: theme.colorScheme.primary, 
-                                 size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Hearings (${cases.length})',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ...cases.map((c) => ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: theme.colorScheme.primary.withAlpha((0.15 * 255).toInt()),
-                          child: Icon(Icons.gavel, color: theme.colorScheme.primary),
-                        ),
-                        title: Text(
-                          c.title,
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Client: ${c.clientName}'),
-                            Text(
-                              'Hearing: ${DateFormat('EEE, MMM d, yyyy').format(c.nextHearing)}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.secondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )),
-                    ],
-                    
-                    // Tasks Section
-                    if (tasks.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Icon(Icons.task_alt, 
-                                 color: theme.colorScheme.secondary, 
-                                 size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Tasks (${tasks.length})',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.secondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ...tasks.map((task) => ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: task.isCompleted 
-                                ? Colors.green.withAlpha((0.15 * 255).toInt())
-                              : theme.colorScheme.secondary.withAlpha((0.15 * 255).toInt()),
-                          child: Icon(
-                            task.isCompleted 
-                                ? Icons.check_circle 
-                                : Icons.task_alt,
-                            color: task.isCompleted 
-                                ? Colors.green 
-                                : theme.colorScheme.secondary,
-                          ),
-                        ),
-                        title: Text(
-                          task.title,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            decoration: task.isCompleted 
-                                ? TextDecoration.lineThrough 
-                                : null,
-                          ),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (task.description != null)
-                              Text(task.description!),
-                            Text(
-                              'Due: ${DateFormat('EEE, MMM d, yyyy').format(task.dueDate)}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.secondary,
-                              ),
-                            ),
-                            if (task.linkedCaseId != null)
-                              Text(
-                                'Linked to case',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontStyle: FontStyle.italic,
+                    return ListView(
+                      children: [
+                        // Cases Section
+                        if (cases.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                Icon(Icons.gavel,
+                                    color: theme.colorScheme.primary, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Hearings (${cases.length})',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.primary,
+                                  ),
                                 ),
-                              ),
-                          ],
-                        ),
-                        trailing: task.hasReminder 
-                            ? Icon(Icons.notifications, 
-                                   color: theme.colorScheme.secondary, 
-                                   size: 20)
-                            : null,
-                      )),
-                    ],
-                  ],
+                              ],
+                            ),
+                          ),
+                          ...cases.map((c) => ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: theme.colorScheme.primary
+                                      .withAlpha((0.15 * 255).toInt()),
+                                  child: Icon(Icons.gavel,
+                                      color: theme.colorScheme.primary),
+                                ),
+                                title: Text(
+                                  c.title,
+                                  style: theme.textTheme.titleMedium,
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Client: ${c.clientName}'),
+                                    Text(
+                                      'Hearing: ${DateFormat('EEE, MMM d, yyyy').format(c.nextHearing)}',
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.secondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        ],
+
+                        // Tasks Section
+                        if (tasks.isNotEmpty) ...[
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                Icon(Icons.task_alt,
+                                    color: theme.colorScheme.secondary,
+                                    size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Tasks (${tasks.length})',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.secondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ...tasks.map((task) => ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: task.isCompleted
+                                      ? Colors.green
+                                          .withAlpha((0.15 * 255).toInt())
+                                      : theme.colorScheme.secondary
+                                          .withAlpha((0.15 * 255).toInt()),
+                                  child: Icon(
+                                    task.isCompleted
+                                        ? Icons.check_circle
+                                        : Icons.task_alt,
+                                    color: task.isCompleted
+                                        ? Colors.green
+                                        : theme.colorScheme.secondary,
+                                  ),
+                                ),
+                                title: Text(
+                                  task.title,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    decoration: task.isCompleted
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                  ),
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (task.description != null)
+                                      Text(task.description!),
+                                    Text(
+                                      'Due: ${DateFormat('EEE, MMM d, yyyy').format(task.dueDate)}',
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.secondary,
+                                      ),
+                                    ),
+                                    if (task.linkedCaseId != null)
+                                      Text(
+                                        'Linked to case',
+                                        style:
+                                            theme.textTheme.bodySmall?.copyWith(
+                                          color: theme.colorScheme.primary,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                trailing: task.hasReminder
+                                    ? Icon(Icons.notifications,
+                                        color: theme.colorScheme.secondary,
+                                        size: 20)
+                                    : null,
+                              )),
+                        ],
+                      ],
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
+            ),
           )
         ],
       ),

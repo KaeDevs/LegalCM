@@ -21,9 +21,9 @@ class ClientsController extends GetxController {
   final sortOptions = ['Name', 'Email', 'Phone', 'City', 'State'].obs;
 
   // Computed filtered clients
-  List<ClientModel> get filteredClients {
+  RxList<ClientModel> get filteredClients {
     final allClients = clientBox.values.toList().cast<ClientModel>();
-    return _filterAndSortClients(allClients);
+    return _filterAndSortClients(allClients).obs;
   }
 
   List<String> get cityOptions {

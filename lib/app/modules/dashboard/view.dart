@@ -9,6 +9,7 @@ import '../../data/models/case_model.dart';
 import '../../data/models/client_model.dart';
 import '../../data/models/task_model.dart';
 import '../tasks/task_detail_view.dart';
+import 'profile_page.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
@@ -23,34 +24,35 @@ class DashboardView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          'Dashboard',
-          style: Tools.oswaldValue(context).copyWith(color: Colors.white),
-        ),
-        actions: [
-          
-          PopupMenuButton(icon: Icon(Icons.more_vert),
-          onSelected: (value) {
-            if(value == 'About'){
-              Get.to(AboutPage());
-            }else{
-              SystemNavigator.pop();
-            }
-          
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(value: 'About', child: Text('About')),
-            PopupMenuItem(value: 'Exit', child: Text('Exit')),
-          ]
-          )
-  
-        ]
-      ),
+          centerTitle: true,
+          title: Text(
+            'Dashboard',
+            style: Tools.oswaldValue(context).copyWith(color: Colors.white),
+          ),
+          leading: IconButton(
+            onPressed: () {
+              Get.to(() => const ProfilePage());
+            }, 
+            icon: Icon(Icons.menu)),
+          actions: [
+            PopupMenuButton(
+                icon: Icon(Icons.more_vert),
+                onSelected: (value) {
+                  if (value == 'About') {
+                    Get.to(() => AboutPage());
+                  } else {
+                    SystemNavigator.pop();
+                  }
+                },
+                itemBuilder: (context) => [
+                      PopupMenuItem(value: 'About', child: Text('About')),
+                      PopupMenuItem(value: 'Exit', child: Text('Exit')),
+                    ])
+          ]),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
-          children : [
+          children: [
             Row(
               spacing: 16,
               children: <Widget>[
@@ -101,7 +103,6 @@ class DashboardView extends StatelessWidget {
                   child: NormalCard(
                     title: 'Billing',
                     icon: Icons.currency_rupee_outlined,
-                    
                     onTap: () => Get.toNamed('/billing'),
                     color: const Color.fromARGB(255, 94, 112, 217),
                   ),
@@ -112,7 +113,6 @@ class DashboardView extends StatelessWidget {
             Card(
               elevation: 2,
               borderOnForeground: true,
-              
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -132,81 +132,90 @@ class DashboardView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                
                     ValueListenableBuilder(
-                      valueListenable: Hive.box<TaskModel>('tasks').listenable(),
+                      valueListenable:
+                          Hive.box<TaskModel>('tasks').listenable(),
                       builder: (context, Box<TaskModel> taskBox, _) {
-                        final tasks = taskBox.values.where((t) => !t.isCompleted).toList();
-                
+                        final tasks = taskBox.values
+                            .where((t) => !t.isCompleted)
+                            .toList();
+
                         if (tasks.isEmpty) {
                           return GestureDetector(
-                onTap: () => Get.toNamed('/tasks'),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.colorScheme.primary),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.add_task, color: Colors.blueAccent),
-                      const SizedBox(width: 8),
-                      Text(
-                        "No pending tasks — Add Task",
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                            onTap: () => Get.toNamed('/tasks'),
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color:
+                                    theme.colorScheme.primary.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                    color: theme.colorScheme.primary),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.add_task,
+                                      color: Colors.blueAccent),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "No pending tasks — Add Task",
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           );
                         }
-                
+
                         return ListView.separated(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: tasks.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 8),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
                           itemBuilder: (context, index) {
-                final task = tasks[index];
-                
-                return GestureDetector(
-                  onTap: () => Get.to(() => TaskDetailView(task: task)),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.check_circle_outline,
-                            color: theme.colorScheme.primary),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            task.title,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        const Icon(Icons.arrow_forward_ios, size: 16),
-                      ],
-                    ),
-                  ),
-                );
+                            final task = tasks[index];
+
+                            return GestureDetector(
+                              onTap: () =>
+                                  Get.to(() => TaskDetailView(task: task)),
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: theme.cardColor,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.check_circle_outline,
+                                        color: theme.colorScheme.primary),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        task.title,
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    const Icon(Icons.arrow_forward_ios,
+                                        size: 16),
+                                  ],
+                                ),
+                              ),
+                            );
                           },
                         );
                       },
@@ -215,7 +224,6 @@ class DashboardView extends StatelessWidget {
                 ),
               ),
             )
-
           ],
         ),
       ),

@@ -1,3 +1,8 @@
+import 'dart:io';
+
+import 'package:path_provider/path_provider.dart';
+import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
@@ -7,6 +12,8 @@ import '../../../data/models/time_entry_model.dart';
 import '../../../data/models/expense_model.dart';
 import '../../../data/models/case_model.dart';
 import 'package:collection/collection.dart';
+
+import '../../../services/pdf_invoice_service.dart';
 
 class InvoiceDetailView extends StatefulWidget {
   final InvoiceModel invoice;
@@ -126,8 +133,8 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text("No time entries",
-                    style: GoogleFonts.poppins(
-                        fontSize: 13, color: Colors.grey)),
+                    style:
+                        GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
               ),
 
             const SizedBox(height: 24),
@@ -159,8 +166,8 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text("No expenses",
-                    style: GoogleFonts.poppins(
-                        fontSize: 13, color: Colors.grey)),
+                    style:
+                        GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
               ),
 
             const Divider(height: 32),
@@ -190,6 +197,31 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
                   snackPosition: SnackPosition.BOTTOM,
                 );
               },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text("Export PDF"),
+                  onPressed: () async {
+                    final pdfData = await PdfInvoiceService.generate(invoice);
+                    await Printing.layoutPdf(onLayout: (_) => pdfData);
+                  },
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.share),
+                  label: const Text("Share"),
+                  onPressed: () async {
+                    final pdfData = await PdfInvoiceService.generate(invoice);
+                    final dir = await getTemporaryDirectory();
+                    final file = File('${dir.path}/invoice_${invoice.id}.pdf');
+                    await file.writeAsBytes(pdfData);
+                    await Share.shareXFiles([XFile(file.path)],
+                        text: "Invoice #${invoice.id}");
+                  },
+                ),
+              ],
             ),
           ],
         ),
