@@ -100,9 +100,6 @@ class LoginController extends GetxController {
         // Save user data to Hive
         await _saveUserToHive(user, googleUser);
 
-        isLoggedIn.value = true;
-        isLoading.value = false;
-
         // Restore backup from Drive before navigating to dashboard
         try {
           await restoreFromDrive(client);
@@ -110,10 +107,12 @@ class LoginController extends GetxController {
           print(
               'No backup found or error restoring from Drive: ${e.toString()}');
         }
-        // Use a microtask to avoid build conflicts
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Get.offAllNamed('/dashboard');
-        });
+
+        // Ensure all boxes are open before proceeding
+        await ensureAllBoxesOpen();
+
+        isLoggedIn.value = true;
+        isLoading.value = false;
       } else {
         print('Firebase authentication failed - no user returned');
         isLoading.value = false;

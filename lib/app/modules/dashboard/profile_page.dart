@@ -211,24 +211,27 @@ class _ProfilePageState extends State<ProfilePage> {
                           const SizedBox(height: 16),
                           Divider(),
                           const SizedBox(height: 16),
-                          ListTile(
-                            leading: Icon(Icons.phone,
-                                color: theme.colorScheme.primary),
-                            title: const Text('Phone'),
-                            subtitle: Text(user!.phone ?? ''),
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.location_city,
-                                color: theme.colorScheme.primary),
-                            title: const Text('City'),
-                            subtitle: Text(user!.city ?? ''),
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.location_on,
-                                color: theme.colorScheme.primary),
-                            title: const Text('State'),
-                            subtitle: Text(user!.state ?? ''),
-                          ),
+                          if ((user!.phone ?? '').trim().isNotEmpty)
+                            ListTile(
+                              leading: Icon(Icons.phone,
+                                  color: theme.colorScheme.primary),
+                              title: const Text('Phone'),
+                              subtitle: Text(user!.phone ?? ''),
+                            ),
+                          if ((user!.city ?? '').trim().isNotEmpty)
+                            ListTile(
+                              leading: Icon(Icons.location_city,
+                                  color: theme.colorScheme.primary),
+                              title: const Text('City'),
+                              subtitle: Text(user!.city ?? ''),
+                            ),
+                          if ((user!.state ?? '').trim().isNotEmpty)
+                            ListTile(
+                              leading: Icon(Icons.location_on,
+                                  color: theme.colorScheme.primary),
+                              title: const Text('State'),
+                              subtitle: Text(user!.state ?? ''),
+                            ),
                           const SizedBox(height: 24),
                           ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
@@ -236,28 +239,47 @@ class _ProfilePageState extends State<ProfilePage> {
                               foregroundColor: Colors.white,
                             ),
                             onPressed: () async {
-                              final loginController =
-                                  Get.put(LoginController());
-                              final googleUser = await loginController
-                                  .googleSignIn
-                                  .signInSilently();
-                              if (googleUser != null) {
-                                final authHeaders =
-                                    await googleUser.authHeaders;
-                                final client = GoogleAuthClient(authHeaders);
-                                await loginController
-                                    .deleteBackupFromDrive(client);
-                                await loginController.restoreFromDrive(client);
-                                Get.snackbar('Restore',
-                                    'Data restored from Google Drive.',
-                                    snackPosition: SnackPosition.BOTTOM);
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Confirm Data Deletion'),
+                                  content: const Text('Are you sure you want to erase ALL your data? This cannot be undone.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(true),
+                                      child: const Text('Yes, erase all'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) {
+                                // Show loading dialog
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) => const _ClearDataLoadingDialog(),
+                                );
+                                final loginController = Get.put(LoginController());
+                                final googleUser = await loginController.googleSignIn.signInSilently();
+                                if (googleUser != null) {
+                                  final authHeaders = await googleUser.authHeaders;
+                                  final client = GoogleAuthClient(authHeaders);
+                                  await loginController.deleteBackupFromDrive(client);
+                                  await loginController.restoreFromDrive(client);
+                                }
+                                await Hive.deleteFromDisk();
+                                await loginController.ensureAllBoxesOpen();
+                                await loginController.signOut();
+                                // Close loading dialog
+                                if (Navigator.of(context, rootNavigator: true).canPop()) {
+                                  Navigator.of(context, rootNavigator: true).pop();
+                                }
+                                Get.snackbar('Data Cleared', 'All local and Drive backup data deleted. You have been signed out.', snackPosition: SnackPosition.BOTTOM);
                               }
-                              await Hive.deleteFromDisk();
-                              await loginController.ensureAllBoxesOpen();
-                              Get.snackbar('Data Cleared',
-                                  'All local and Drive backup data deleted.',
-                                  snackPosition: SnackPosition.BOTTOM);
-                              // Optionally, you can also log the user out or restart the app here
                             },
                             icon: const Icon(Icons.delete_forever),
                             label: const Text('Clear All Data'),
@@ -268,6 +290,29 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ClearDataLoadingDialog extends StatelessWidget {
+  const _ClearDataLoadingDialog();
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 8),
+          const CircularProgressIndicator(),
+          const SizedBox(height: 24),
+          Text(
+            'Clearing all your data...',
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

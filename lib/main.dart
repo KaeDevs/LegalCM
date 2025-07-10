@@ -35,7 +35,7 @@ void main() async {
   await Hive.openBox<CaseModel>('cases');
   await Hive.openBox<ClientModel>('clients');
   await Hive.openBox<TimeEntryModel>('time_entries');
-  await Hive.openBox<ExpenseModel>('expenses'); // <-- open expenses box
+  await Hive.openBox<ExpenseModel>('expenses'); 
   await Hive.openBox<UserModel>('user');
 
   runApp(const MyApp());

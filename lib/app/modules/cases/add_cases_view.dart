@@ -90,6 +90,7 @@ class _AddCaseViewState extends State<AddCaseView> {
 
         await widget.existingCase!.save();
         Get.back(result: 'updated');
+        // Get.back(result: 'updated');
 
         Get.snackbar('Updated', 'Case updated successfully!');
       } else {
@@ -111,6 +112,7 @@ class _AddCaseViewState extends State<AddCaseView> {
         );
         await Hive.box<CaseModel>('cases').add(newCase);
         Get.back(result: 'updated');
+        // Get.back(result: 'updated');
 
         Get.snackbar('Success', 'Case added successfully!');
       }

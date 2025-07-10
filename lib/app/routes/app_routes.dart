@@ -15,6 +15,8 @@ import '../modules/dashboard/view.dart';
 import '../modules/cases/view.dart';
 import '../modules/login/binding.dart';
 import '../modules/login/view.dart';
+import '../modules/splash/binding.dart';
+import '../modules/splash/view.dart';
 
 import '../modules/clients/view.dart';
 import '../modules/calendar/view.dart';
@@ -22,9 +24,13 @@ import '../modules/tasks/add_task_view.dart';
 import '../modules/tasks/view.dart';
 
 class AppPages {
-  static const initial = '/login';
+  static const initial = '/splash';
 
   static final routes = [
+    GetPage(
+        name: '/splash',
+        page: () => const SplashView(),
+        binding: SplashBinding()),
     GetPage(
         name: '/login',
         page: () => const LoginView(),

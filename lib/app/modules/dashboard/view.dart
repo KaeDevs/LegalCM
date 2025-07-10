@@ -66,7 +66,8 @@ class DashboardView extends StatelessWidget {
                   children: <Widget>[
                     Expanded(
                       child: ValueListenableBuilder(
-                        valueListenable: Hive.box<CaseModel>('cases').listenable(),
+                        valueListenable:
+                            Hive.box<CaseModel>('cases').listenable(),
                         builder: (context, Box<CaseModel> caseBox, _) {
                           return DashboardCard(
                             title: 'Cases',
@@ -168,7 +169,8 @@ class DashboardView extends StatelessWidget {
                                       const SizedBox(width: 8),
                                       Text(
                                         "No pending tasks — Add Task",
-                                        style: theme.textTheme.bodyLarge?.copyWith(
+                                        style:
+                                            theme.textTheme.bodyLarge?.copyWith(
                                           color: theme.colorScheme.primary,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -237,37 +239,95 @@ class DashboardView extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: 0,
-            right: 0,
-            bottom: 16,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.backup),
-                label: const Text('Backup Now'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                onPressed: () async {
-                  final loginController = Get.isRegistered<LoginController>()
-                      ? Get.find<LoginController>()
-                      : Get.put(LoginController());
-                  final googleUser = await loginController.googleSignIn.signInSilently();
-                  if (googleUser != null) {
-                    final authHeaders = await googleUser.authHeaders;
-                    final client = GoogleAuthClient(authHeaders);
-                    await loginController.backupToDrive(client);
-                    Get.snackbar('Backup', 'Backup completed successfully!', snackPosition: SnackPosition.BOTTOM);
-                  } else {
-                    Get.snackbar('Backup', 'Google Sign-In required for backup.', snackPosition: SnackPosition.BOTTOM);
-                  }
-                },
-              ),
-            ),
-          ),
+  left: 0,
+  right: 0,
+  bottom: 16,
+  child: Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 32.0),
+    child: ElevatedButton.icon(
+      icon: const Icon(Icons.backup),
+      label: const Text('Backup Now'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      onPressed: () async {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            bool isCompleted = false;
+            bool _hasRun = false; // ✅ guard to prevent repeated backup
+
+            return StatefulBuilder(
+              builder: (context, setState) {
+                if (!_hasRun) {
+                  _hasRun = true; // ✅ mark as run
+                  // Start backup
+                  Future.microtask(() async {
+                    final loginController = Get.isRegistered<LoginController>()
+                        ? Get.find<LoginController>()
+                        : Get.put(LoginController());
+
+                    final googleUser =
+                        await loginController.googleSignIn.signInSilently();
+
+                    if (googleUser != null) {
+                      final authHeaders = await googleUser.authHeaders;
+                      final client = GoogleAuthClient(authHeaders);
+
+                      await loginController.backupToDrive(client);
+
+                      if (context.mounted) {
+                        setState(() => isCompleted = true);
+                      }
+                    } else {
+                      if (context.mounted) Navigator.of(context).pop();
+                      Get.snackbar(
+                        'Backup',
+                        'Google Sign-In required for backup.',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    }
+                  });
+                }
+
+                return AlertDialog(
+                  content: isCompleted
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.check_circle,
+                                color: Colors.green, size: 48),
+                            const SizedBox(height: 16),
+                            const Text('Backup completed successfully!'),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('Backing up... Please wait'),
+                          ],
+                        ),
+                );
+              },
+            );
+          },
+        );
+      },
+    ),
+  ),
+),
+
         ],
       ),
     );
