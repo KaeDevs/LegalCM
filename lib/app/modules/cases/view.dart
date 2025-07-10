@@ -26,8 +26,8 @@ class CasesView extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                colorScheme.primary.withOpacity(0.9),
-                colorScheme.secondary.withOpacity(0.9),
+                colorScheme.primary.withAlpha((0.9 * 255).toInt()),
+                colorScheme.secondary.withAlpha((0.9 * 255).toInt()),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,

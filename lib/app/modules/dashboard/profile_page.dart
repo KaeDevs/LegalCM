@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:legalcm/app/data/models/user_model.dart';
 import 'package:legalcm/app/utils/tools.dart';
+import 'package:get/get.dart';
+import 'package:legalcm/app/modules/login/controller.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -99,19 +101,21 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Center(
           child: Card(
             elevation: 4,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: isEditing || !isUserPresent
                     ? Column(
-                      children: [
-                        Text(
-                          "Enter Your Details!",
-                          style: Tools.oswaldValue(context).copyWith(fontSize: 24, color: theme.colorScheme.primary),
-                        ),
-                        const SizedBox(height: 24),
-                        Form(
+                        children: [
+                          Text(
+                            "Enter Your Details!",
+                            style: Tools.oswaldValue(context).copyWith(
+                                fontSize: 24, color: theme.colorScheme.primary),
+                          ),
+                          const SizedBox(height: 24),
+                          Form(
                             key: _formKey,
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -121,50 +125,62 @@ class _ProfilePageState extends State<ProfilePage> {
                                   radius: 40,
                                   backgroundColor: theme.colorScheme.primary,
                                   child: Text(
-                                    _nameController.text.isNotEmpty ? _nameController.text[0].toUpperCase() : 'U',
-                                    style: const TextStyle(fontSize: 36, color: Colors.white),
+                                    _nameController.text.isNotEmpty
+                                        ? _nameController.text[0].toUpperCase()
+                                        : 'U',
+                                    style: const TextStyle(
+                                        fontSize: 36, color: Colors.white),
                                   ),
                                 ),
                                 const SizedBox(height: 20),
                                 TextFormField(
                                   controller: _nameController,
-                                  decoration: const InputDecoration(labelText: 'Name'),
-                                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                                  decoration:
+                                      const InputDecoration(labelText: 'Name'),
+                                  validator: (val) => val == null || val.isEmpty
+                                      ? 'Required'
+                                      : null,
                                 ),
                                 const SizedBox(height: 12),
                                 TextFormField(
                                   controller: _emailController,
-                                  decoration: const InputDecoration(labelText: 'Email'),
+                                  decoration:
+                                      const InputDecoration(labelText: 'Email'),
                                   keyboardType: TextInputType.emailAddress,
                                   // validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                                 ),
                                 const SizedBox(height: 12),
                                 TextFormField(
                                   controller: _phoneController,
-                                  decoration: const InputDecoration(labelText: 'Phone'),
+                                  decoration:
+                                      const InputDecoration(labelText: 'Phone'),
                                   keyboardType: TextInputType.phone,
                                 ),
                                 const SizedBox(height: 12),
                                 TextFormField(
                                   controller: _cityController,
-                                  decoration: const InputDecoration(labelText: 'City'),
+                                  decoration:
+                                      const InputDecoration(labelText: 'City'),
                                 ),
                                 const SizedBox(height: 12),
                                 TextFormField(
                                   controller: _stateController,
-                                  decoration: const InputDecoration(labelText: 'State'),
+                                  decoration:
+                                      const InputDecoration(labelText: 'State'),
                                 ),
                                 const SizedBox(height: 24),
                                 ElevatedButton.icon(
                                   onPressed: _saveProfile,
                                   icon: const Icon(Icons.save),
-                                  label: Text(isUserPresent ? 'Update Profile' : 'Save Profile'),
+                                  label: Text(isUserPresent
+                                      ? 'Update Profile'
+                                      : 'Save Profile'),
                                 ),
                               ],
                             ),
                           ),
-                      ],
-                    )
+                        ],
+                      )
                     : Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -173,37 +189,78 @@ class _ProfilePageState extends State<ProfilePage> {
                             radius: 40,
                             backgroundColor: theme.colorScheme.primary,
                             child: Text(
-                              user!.name.isNotEmpty ? user!.name[0].toUpperCase() : 'U',
-                              style: const TextStyle(fontSize: 36, color: Colors.white),
+                              user!.name.isNotEmpty
+                                  ? user!.name[0].toUpperCase()
+                                  : 'U',
+                              style: const TextStyle(
+                                  fontSize: 36, color: Colors.white),
                             ),
                           ),
                           const SizedBox(height: 20),
                           Text(
                             user!.name,
-                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                            style: theme.textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             user!.email,
-                            style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary),
+                            style: theme.textTheme.bodyLarge
+                                ?.copyWith(color: theme.colorScheme.primary),
                           ),
                           const SizedBox(height: 16),
                           Divider(),
                           const SizedBox(height: 16),
                           ListTile(
-                            leading: Icon(Icons.phone, color: theme.colorScheme.primary),
+                            leading: Icon(Icons.phone,
+                                color: theme.colorScheme.primary),
                             title: const Text('Phone'),
                             subtitle: Text(user!.phone ?? ''),
                           ),
                           ListTile(
-                            leading: Icon(Icons.location_city, color: theme.colorScheme.primary),
+                            leading: Icon(Icons.location_city,
+                                color: theme.colorScheme.primary),
                             title: const Text('City'),
                             subtitle: Text(user!.city ?? ''),
                           ),
                           ListTile(
-                            leading: Icon(Icons.location_on, color: theme.colorScheme.primary),
+                            leading: Icon(Icons.location_on,
+                                color: theme.colorScheme.primary),
                             title: const Text('State'),
                             subtitle: Text(user!.state ?? ''),
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () async {
+                              final loginController =
+                                  Get.put(LoginController());
+                              final googleUser = await loginController
+                                  .googleSignIn
+                                  .signInSilently();
+                              if (googleUser != null) {
+                                final authHeaders =
+                                    await googleUser.authHeaders;
+                                final client = GoogleAuthClient(authHeaders);
+                                await loginController
+                                    .deleteBackupFromDrive(client);
+                                await loginController.restoreFromDrive(client);
+                                Get.snackbar('Restore',
+                                    'Data restored from Google Drive.',
+                                    snackPosition: SnackPosition.BOTTOM);
+                              }
+                              await Hive.deleteFromDisk();
+                              await loginController.ensureAllBoxesOpen();
+                              Get.snackbar('Data Cleared',
+                                  'All local and Drive backup data deleted.',
+                                  snackPosition: SnackPosition.BOTTOM);
+                              // Optionally, you can also log the user out or restart the app here
+                            },
+                            icon: const Icon(Icons.delete_forever),
+                            label: const Text('Clear All Data'),
                           ),
                         ],
                       ),
@@ -214,4 +271,4 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-} 
+}

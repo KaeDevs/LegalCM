@@ -55,184 +55,220 @@ class DashboardView extends StatelessWidget {
                       PopupMenuItem(value: 'Exit', child: Text('Exit')),
                     ])
           ]),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            Row(
-              spacing: 16,
-              children: <Widget>[
-                Expanded(
-                  child: ValueListenableBuilder(
-                    valueListenable: Hive.box<CaseModel>('cases').listenable(),
-                    builder: (context, Box<CaseModel> caseBox, _) {
-                      return DashboardCard(
-                        title: 'Cases',
-                        value: '${caseBox.length}',
-                        icon: Icons.gavel,
-                        onTap: () => Get.toNamed('/cases'),
-                        color: Colors.indigo,
-                      );
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: ValueListenableBuilder(
-                    valueListenable:
-                        Hive.box<ClientModel>('clients').listenable(),
-                    builder: (context, Box<ClientModel> clientBox, _) {
-                      return DashboardCard(
-                        title: 'Clients',
-                        value: '${clientBox.length}',
-                        icon: Icons.person,
-                        onTap: () => Get.toNamed('/clients'),
-                        color: Colors.teal,
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Row(
-              spacing: 16,
-              children: <Widget>[
-                Expanded(
-                  child: NormalCard(
-                    title: 'Calendar',
-                    icon: Icons.calendar_month,
-                    onTap: () => Get.toNamed('/calendar'),
-                    color: const Color.fromARGB(255, 94, 112, 217),
-                  ),
-                ),
-                Expanded(
-                  child: NormalCard(
-                    title: 'Billing',
-                    icon: Icons.currency_rupee_outlined,
-                    onTap: () => Get.toNamed('/billing'),
-                    color: const Color.fromARGB(255, 94, 112, 217),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            Card(
-              elevation: 2,
-              borderOnForeground: true,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () => Get.toNamed('/tasks'),
-                      child: Text(
-                        "Tasks To Do",
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontFamily: 'oswald',
-                          letterSpacing: 2,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                          // decoration: TextDecoration.underline,
-                        ),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
+              children: [
+                Row(
+                  spacing: 16,
+                  children: <Widget>[
+                    Expanded(
+                      child: ValueListenableBuilder(
+                        valueListenable: Hive.box<CaseModel>('cases').listenable(),
+                        builder: (context, Box<CaseModel> caseBox, _) {
+                          return DashboardCard(
+                            title: 'Cases',
+                            value: '${caseBox.length}',
+                            icon: Icons.gavel,
+                            onTap: () => Get.toNamed('/cases'),
+                            color: Colors.indigo,
+                          );
+                        },
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    ValueListenableBuilder(
-                      valueListenable:
-                          Hive.box<TaskModel>('tasks').listenable(),
-                      builder: (context, Box<TaskModel> taskBox, _) {
-                        final tasks = taskBox.values
-                            .where((t) => !t.isCompleted)
-                            .toList();
-
-                        if (tasks.isEmpty) {
-                          return GestureDetector(
-                            onTap: () => Get.toNamed('/tasks'),
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary
-                                    .withAlpha((0.05 * 255).toInt()),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                    color: theme.colorScheme.primary),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.add_task,
-                                      color: Colors.blueAccent),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "No pending tasks — Add Task",
-                                    style: theme.textTheme.bodyLarge?.copyWith(
-                                      color: theme.colorScheme.primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                    Expanded(
+                      child: ValueListenableBuilder(
+                        valueListenable:
+                            Hive.box<ClientModel>('clients').listenable(),
+                        builder: (context, Box<ClientModel> clientBox, _) {
+                          return DashboardCard(
+                            title: 'Clients',
+                            value: '${clientBox.length}',
+                            icon: Icons.person,
+                            onTap: () => Get.toNamed('/clients'),
+                            color: Colors.teal,
                           );
-                        }
-
-                        return ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: tasks.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 8),
-                          itemBuilder: (context, index) {
-                            final task = tasks[index];
-
-                            return GestureDetector(
-                              onTap: () =>
-                                  Get.to(() => TaskDetailView(task: task)),
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: theme.cardColor,
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black
-                                          .withAlpha((0.05 * 255).toInt()),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.check_circle_outline,
-                                        color: theme.colorScheme.primary),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        task.title,
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                    const Icon(Icons.arrow_forward_ios,
-                                        size: 16),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
+                        },
+                      ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 24),
+                Row(
+                  spacing: 16,
+                  children: <Widget>[
+                    Expanded(
+                      child: NormalCard(
+                        title: 'Calendar',
+                        icon: Icons.calendar_month,
+                        onTap: () => Get.toNamed('/calendar'),
+                        color: const Color.fromARGB(255, 94, 112, 217),
+                      ),
+                    ),
+                    Expanded(
+                      child: NormalCard(
+                        title: 'Billing',
+                        icon: Icons.currency_rupee_outlined,
+                        onTap: () => Get.toNamed('/billing'),
+                        color: const Color.fromARGB(255, 94, 112, 217),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                Card(
+                  elevation: 2,
+                  borderOnForeground: true,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Get.toNamed('/tasks'),
+                          child: Text(
+                            "Tasks To Do",
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontFamily: 'oswald',
+                              letterSpacing: 2,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                              // decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ValueListenableBuilder(
+                          valueListenable:
+                              Hive.box<TaskModel>('tasks').listenable(),
+                          builder: (context, Box<TaskModel> taskBox, _) {
+                            final tasks = taskBox.values
+                                .where((t) => !t.isCompleted)
+                                .toList();
+
+                            if (tasks.isEmpty) {
+                              return GestureDetector(
+                                onTap: () => Get.toNamed('/tasks'),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primary
+                                        .withAlpha((0.05 * 255).toInt()),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                        color: theme.colorScheme.primary),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.add_task,
+                                          color: Colors.blueAccent),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        "No pending tasks — Add Task",
+                                        style: theme.textTheme.bodyLarge?.copyWith(
+                                          color: theme.colorScheme.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: tasks.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 8),
+                              itemBuilder: (context, index) {
+                                final task = tasks[index];
+
+                                return GestureDetector(
+                                  onTap: () =>
+                                      Get.to(() => TaskDetailView(task: task)),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: theme.cardColor,
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withAlpha((0.05 * 255).toInt()),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.check_circle_outline,
+                                            color: theme.colorScheme.primary),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            task.title,
+                                            style: theme.textTheme.titleMedium
+                                                ?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                        const Icon(Icons.arrow_forward_ios,
+                                            size: 16),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 16,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.backup),
+                label: const Text('Backup Now'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () async {
+                  final loginController = Get.isRegistered<LoginController>()
+                      ? Get.find<LoginController>()
+                      : Get.put(LoginController());
+                  final googleUser = await loginController.googleSignIn.signInSilently();
+                  if (googleUser != null) {
+                    final authHeaders = await googleUser.authHeaders;
+                    final client = GoogleAuthClient(authHeaders);
+                    await loginController.backupToDrive(client);
+                    Get.snackbar('Backup', 'Backup completed successfully!', snackPosition: SnackPosition.BOTTOM);
+                  } else {
+                    Get.snackbar('Backup', 'Google Sign-In required for backup.', snackPosition: SnackPosition.BOTTOM);
+                  }
+                },
               ),
-            )
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
