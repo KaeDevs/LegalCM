@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'app/data/models/case_model.dart';
 import 'app/data/models/client_model.dart';
 import 'app/data/models/task_model.dart';
@@ -14,6 +15,10 @@ import 'app/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  await Firebase.initializeApp();
+  
   await Hive.initFlutter();
   await NotificationService.init();
 

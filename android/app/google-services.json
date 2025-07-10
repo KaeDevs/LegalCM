@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "994158267331",
+    "project_id": "legalcm-908db",
+    "storage_bucket": "legalcm-908db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:994158267331:android:d6413025ca7ec6e54c8b76",
+        "android_client_info": {
+          "package_name": "com.example.legalcm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "994158267331-915vth2ripv1eprc77silole4lvqeb79.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.legalcm",
+            "certificate_hash": "08365b0c692d5d5bfc54e37177d0b5eb5be21bc2"
+          }
+        },
+        {
+          "client_id": "994158267331-t3v0ucovfos3u6ibjvt3mdapbs0sao56.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPuo8ppVYXj8sj3I8aLRiOuOasFhri0NQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "994158267331-t3v0ucovfos3u6ibjvt3mdapbs0sao56.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -13,6 +13,8 @@ import '../modules/clients/add_client_view.dart';
 import '../modules/clients/client_binding.dart';
 import '../modules/dashboard/view.dart';
 import '../modules/cases/view.dart';
+import '../modules/login/binding.dart';
+import '../modules/login/view.dart';
 
 import '../modules/clients/view.dart';
 import '../modules/calendar/view.dart';
@@ -20,9 +22,13 @@ import '../modules/tasks/add_task_view.dart';
 import '../modules/tasks/view.dart';
 
 class AppPages {
-  static const initial = '/dashboard';
+  static const initial = '/login';
 
   static final routes = [
+    GetPage(
+        name: '/login',
+        page: () => const LoginView(),
+        binding: LoginBinding()),
     GetPage(
         name: '/dashboard',
         page: () => const DashboardView(),

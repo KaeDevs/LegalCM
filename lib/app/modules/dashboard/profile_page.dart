@@ -36,15 +36,17 @@ class _ProfilePageState extends State<ProfilePage> {
     if (user != null) {
       _nameController.text = user!.name;
       _emailController.text = user!.email;
-      _phoneController.text = user!.phone;
-      _cityController.text = user!.city;
-      _stateController.text = user!.state;
+      _phoneController.text = user!.phone ?? '';
+      _cityController.text = user!.city ?? '';
+      _stateController.text = user!.state ?? '';
     }
   }
 
   void _saveProfile() async {
     if (_formKey.currentState!.validate()) {
       final newUser = UserModel(
+        id: user?.id ?? '',
+        createdAt: user?.createdAt ?? DateTime.now(),
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         phone: _phoneController.text.trim(),
@@ -191,17 +193,17 @@ class _ProfilePageState extends State<ProfilePage> {
                           ListTile(
                             leading: Icon(Icons.phone, color: theme.colorScheme.primary),
                             title: const Text('Phone'),
-                            subtitle: Text(user!.phone),
+                            subtitle: Text(user!.phone ?? ''),
                           ),
                           ListTile(
                             leading: Icon(Icons.location_city, color: theme.colorScheme.primary),
                             title: const Text('City'),
-                            subtitle: Text(user!.city),
+                            subtitle: Text(user!.city ?? ''),
                           ),
                           ListTile(
                             leading: Icon(Icons.location_on, color: theme.colorScheme.primary),
                             title: const Text('State'),
-                            subtitle: Text(user!.state),
+                            subtitle: Text(user!.state ?? ''),
                           ),
                         ],
                       ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:legalcm/app/modules/about/view.dart';
+import 'package:legalcm/app/modules/login/controller.dart';
 import 'package:legalcm/app/utils/tools.dart';
 import '../../data/models/case_model.dart';
 import '../../data/models/client_model.dart';
@@ -30,22 +30,28 @@ class DashboardView extends StatelessWidget {
             style: Tools.oswaldValue(context).copyWith(color: Colors.white),
           ),
           leading: IconButton(
-            onPressed: () {
-              Get.to(() => const ProfilePage());
-            }, 
-            icon: Icon(Icons.menu)),
+              onPressed: () {
+                Get.to(() => const ProfilePage());
+              },
+              icon: Icon(Icons.person_outline)),
           actions: [
             PopupMenuButton(
                 icon: Icon(Icons.more_vert),
                 onSelected: (value) {
                   if (value == 'About') {
                     Get.to(() => AboutPage());
+                  } else if (value == 'Sign Out') {
+                    final loginController = Get.isRegistered<LoginController>()
+                        ? Get.find<LoginController>()
+                        : Get.put(LoginController());
+                    loginController.signOut();
                   } else {
                     SystemNavigator.pop();
                   }
                 },
                 itemBuilder: (context) => [
                       PopupMenuItem(value: 'About', child: Text('About')),
+                      PopupMenuItem(value: 'Sign Out', child: Text('Sign Out')),
                       PopupMenuItem(value: 'Exit', child: Text('Exit')),
                     ])
           ]),
@@ -146,8 +152,8 @@ class DashboardView extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color:
-                                    theme.colorScheme.primary.withOpacity(0.05),
+                                color: theme.colorScheme.primary
+                                    .withAlpha((0.05 * 255).toInt()),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                     color: theme.colorScheme.primary),
@@ -190,7 +196,8 @@ class DashboardView extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(16),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
+                                      color: Colors.black
+                                          .withAlpha((0.05 * 255).toInt()),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     ),
@@ -257,7 +264,7 @@ class DashboardCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.9),
+          color: color.withAlpha((0.9 * 255).toInt()),
           borderRadius: BorderRadius.circular(20),
         ),
         child: LayoutBuilder(
@@ -333,7 +340,7 @@ class NormalCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.9),
+          color: color.withAlpha((0.9 * 255).toInt()),
           borderRadius: BorderRadius.circular(20),
         ),
         child: LayoutBuilder(
