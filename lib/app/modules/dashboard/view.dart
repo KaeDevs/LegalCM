@@ -1,23 +1,158 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:legalcm/app/modules/about/view.dart';
+import 'package:legalcm/app/modules/dashboard/controller.dart';
 import 'package:legalcm/app/modules/login/controller.dart';
 import 'package:legalcm/app/utils/tools.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../data/models/case_model.dart';
 import '../../data/models/client_model.dart';
 import '../../data/models/task_model.dart';
+import '../../services/app_update.dart';
 import '../tasks/task_detail_view.dart';
 import 'profile_page.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
-class DashboardView extends StatelessWidget {
-  const DashboardView({super.key});
+class DashboardView extends GetView<DashBoardController> {
+
+  DashboardView({super.key});
+
+  Future<void> _handleBackup(BuildContext context) async {
+  final loginController = Get.find<LoginController>(); 
+  BuildContext currentContext = context;
+
+  // Record when backup starts
+  final startTime = DateTime.now();
+
+  // Show the loading dialog
+  try {
+    Get.dialog(
+      // context: currentContext,
+      barrierDismissible: false,
+      // builder: (_) => 
+      const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Backing up... Please wait'),
+          ],
+        ),
+      ),
+    );
+  } catch (_) {}
+
+  try {
+    GoogleSignInAccount? googleUser;
+
+    try {
+      googleUser = await loginController.googleSignIn.signInSilently();
+      if (googleUser == null) {
+        return _showError(currentContext, 'Please sign in to Google Drive first', startTime);
+      }
+    } on PlatformException catch (e) {
+      if (e.code == 'network_error') {
+        return _showError(currentContext, 'No internet connection. Please check your network.', startTime);
+      }
+      rethrow;
+    } on SocketException {
+      return _showError(currentContext, 'Network connection failed.', startTime);
+    } on TimeoutException {
+      return _showError(currentContext, 'Connection timed out.', startTime);
+    }
+
+    try {
+      final authHeaders = await googleUser.authHeaders;
+      final client = GoogleAuthClient(authHeaders);
+      await loginController.backupToDrive(client);
+    } on PlatformException catch (e) {
+      if (e.code == 'network_error') {
+        return _showError(currentContext, 'Network error during backup.', startTime);
+      }
+      rethrow;
+    } on SocketException {
+      return _showError(currentContext, 'Network error during backup.', startTime);
+    } on TimeoutException {
+      return _showError(currentContext, 'Backup timed out.', startTime);
+    } on HttpException {
+      return _showError(currentContext, 'Server error occurred.', startTime);
+    }
+
+    await _closeDialogAfterMinimumDuration(startTime);
+    _showSnackbar('Backup completed successfully!', isError: false);
+  } catch (e) {
+    await _closeDialogAfterMinimumDuration(startTime);
+    _showSnackbar(_mapError(e), isError: true);
+  }
+}
+
+  void _closeDialog() {
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
+  }
+
+  void _showError(BuildContext context, String message, DateTime startTime) async {
+  await _closeDialogAfterMinimumDuration(startTime);
+  _showSnackbar(message, isError: true);
+}
+
+Future<void> _closeDialogAfterMinimumDuration(DateTime startTime) async {
+  final elapsed = DateTime.now().difference(startTime);
+  const minDuration = Duration(seconds: 4);
+
+  if (elapsed < minDuration) {
+    await Future.delayed(minDuration - elapsed);
+  }
+
+  _closeDialog(); // Close the dialog safely
+}
+
+
+  void _showSnackbar(String message, {required bool isError}) {
+    Get.snackbar(
+      isError ? 'Error' : 'Success',
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: isError ? Colors.red.shade600 : Colors.green.shade600,
+      colorText: Colors.white,
+      duration: Duration(seconds: isError ? 4 : 2),
+      icon: Icon(
+        isError ? Icons.error_outline : Icons.check_circle_outline,
+        color: Colors.white,
+      ),
+      margin: const EdgeInsets.all(8),
+      borderRadius: 8,
+    );
+  }
+
+  String _mapError(dynamic error) {
+    final message = error.toString().toLowerCase();
+    if (message.contains('socket') || message.contains('network')) {
+      return 'Network connection issue. Please check your internet.';
+    } else if (message.contains('timeout')) {
+      return 'Request timed out. Please try again.';
+    } else if (message.contains('permission')) {
+      return 'Permission denied. Please check app permissions.';
+    } else if (message.contains('googleapis')) {
+      return 'Google services unavailable.';
+    }
+    return 'Backup failed. Please try again.';
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
+    
+
 
     // You can get the controller if you want, or just read directly from Hive here
     // final taskController = Get.find<TaskController>();
@@ -43,14 +178,24 @@ class DashboardView extends StatelessWidget {
                   } else if (value == 'Sign Out') {
                     final loginController = Get.isRegistered<LoginController>()
                         ? Get.find<LoginController>()
-                        : Get.put(LoginController());
+                        : Get.put(LoginController(), permanent: true);
                     loginController.signOut();
+                  } else if (value == 'Share') {
+                    SharePlus.instance.share(
+                      ShareParams(
+                        subject: 'Check out my app',
+                        text:
+                            'Check out my app: https://play.google.com/store/apps/details?id=com.example.legalcm',
+                        title: 'Check out my app',
+                      ),
+                    );
                   } else {
                     SystemNavigator.pop();
                   }
                 },
                 itemBuilder: (context) => [
                       PopupMenuItem(value: 'About', child: Text('About')),
+                      PopupMenuItem(value: 'Share', child: Text('Share')),
                       PopupMenuItem(value: 'Sign Out', child: Text('Sign Out')),
                       PopupMenuItem(value: 'Exit', child: Text('Exit')),
                     ])
@@ -234,100 +379,69 @@ class DashboardView extends StatelessWidget {
                       ],
                     ),
                   ),
-                )
+                ),
+                const SizedBox(height: 32),
               ],
             ),
           ),
+          
           Positioned(
-  left: 0,
-  right: 0,
-  bottom: 16,
-  child: Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-    child: ElevatedButton.icon(
-      icon: const Icon(Icons.backup),
-      label: const Text('Backup Now'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      onPressed: () async {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            bool isCompleted = false;
-            bool _hasRun = false; // ✅ guard to prevent repeated backup
-
-            return StatefulBuilder(
-              builder: (context, setState) {
-                if (!_hasRun) {
-                  _hasRun = true; // ✅ mark as run
-                  // Start backup
-                  Future.microtask(() async {
-                    final loginController = Get.isRegistered<LoginController>()
-                        ? Get.find<LoginController>()
-                        : Get.put(LoginController());
-
-                    final googleUser =
-                        await loginController.googleSignIn.signInSilently();
-
-                    if (googleUser != null) {
-                      final authHeaders = await googleUser.authHeaders;
-                      final client = GoogleAuthClient(authHeaders);
-
-                      await loginController.backupToDrive(client);
-
-                      if (context.mounted) {
-                        setState(() => isCompleted = true);
-                      }
-                    } else {
-                      if (context.mounted) Navigator.of(context).pop();
-                      Get.snackbar(
-                        'Backup',
-                        'Google Sign-In required for backup.',
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
-                    }
-                  });
-                }
-
-                return AlertDialog(
-                  content: isCompleted
-                      ? Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.check_circle,
-                                color: Colors.green, size: 48),
-                            const SizedBox(height: 16),
-                            const Text('Backup completed successfully!'),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Close'),
-                            ),
-                          ],
-                        )
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            CircularProgressIndicator(),
-                            SizedBox(height: 16),
-                            Text('Backing up... Please wait'),
-                          ],
+            left: 0,
+            right: 0,
+            bottom: 16,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Obx(() {
+                final connected = controller.isConnected.value;
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Debug indicator (you can remove this later)
+                    if (!connected)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                        child: const Text(
+                          'Offline',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.backup),
+                      label: Text(
+                        connected ? 'Backup Now' : 'No Internet',
+                      ),
+                      
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 40),
+                        backgroundColor: connected
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.grey,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: (connected && !controller.isBackingUp.value)
+      ? () async {
+          controller.isBackingUp.value = true;
+          await _handleBackup(context);
+          await Future.delayed(const Duration(seconds: 4));
+          controller.isBackingUp.value = false;
+        }
+      : null,
+                    ),
+                  ],
                 );
-              },
-            );
-          },
-        );
-      },
-    ),
-  ),
-),
-
+              }),
+            ),
+          ),
         ],
       ),
     );

@@ -33,75 +33,84 @@ class PdfInvoiceService {
     final indigo = PdfColors.indigo;
 
     pdf.addPage(
-      pw.Page(
-        margin: const pw.EdgeInsets.all(32),
-        build: (context) => pw.Column(
+      pw.MultiPage(
+        margin: const pw.EdgeInsets.all(24),
+        header: (context) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text("LegalCM Invoice",
                 style: pw.TextStyle(
-                    font: font, fontSize: 26, fontWeight: pw.FontWeight.bold, color: indigo)),
-            pw.SizedBox(height: 8),
-            pw.Text("Invoice ID: ${invoice.id}",
-                style: pw.TextStyle(font: font, fontSize: 14)),
-            pw.Text("Date: ${invoice.invoiceDate.toLocal().toString().split(' ')[0]}",
-                style: pw.TextStyle(font: font, fontSize: 14)),
-            pw.SizedBox(height: 16),
-            // pw.Text("Client: [Client Name Here]",
-            //     style: pw.TextStyle(font: font, fontSize: 14, fontWeight: pw.FontWeight.bold)),
-            pw.Text("Case: ${caseModel.title}",
-                style: pw.TextStyle(font: font, fontSize: 14)),
-            pw.SizedBox(height: 24),
-
-            pw.Text("Time Entries",
-                style: pw.TextStyle(font: font, fontSize: 16, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 6),
-            ...timeEntries.map((t) => pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Expanded(child: pw.Text(t.description, style: pw.TextStyle(font: font))),
-                pw.Text("${t.hours}h × ₹${t.rate} = ₹${t.total}", style: pw.TextStyle(font: font)),
-              ],
-            )),
-            pw.SizedBox(height: 12),
-
-            pw.Text("Expenses",
-                style: pw.TextStyle(font: font, fontSize: 16, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 6),
-            ...expenses.map((e) => pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Expanded(child: pw.Text(e.title, style: pw.TextStyle(font: font))),
-                pw.Text("₹${e.amount}", style: pw.TextStyle(font: font)),
-              ],
-            )),
-            pw.SizedBox(height: 12),
-
-            pw.Divider(),
-
-           
-            pw.SizedBox(height: 6),
-
-            // Total
+                    font: font, fontSize: 20, fontWeight: pw.FontWeight.bold, color: indigo)),
+            pw.SizedBox(height: 4),
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text("Total", style: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold, fontSize: 14)),
-                pw.Text("₹${invoice.totalAmount.toStringAsFixed(2)}",
-                    style: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold, fontSize: 14)),
+                pw.Text("Invoice ID: ${invoice.id}",
+                    style: pw.TextStyle(font: font, fontSize: 12)),
+                pw.Text("Date: ${invoice.invoiceDate.toLocal().toString().split(' ')[0]}",
+                    style: pw.TextStyle(font: font, fontSize: 12)),
               ],
             ),
-
-            pw.Spacer(),
-
-            // Footer
+            pw.SizedBox(height: 8),
+            pw.Text("Case: ${caseModel.title}",
+                style: pw.TextStyle(font: font, fontSize: 12)),
+            pw.SizedBox(height: 16),
+          ],
+        ),
+        footer: (context) => pw.Column(
+          children: [
             pw.Divider(),
             pw.Center(
               child: pw.Text("Generated using LegalCM App",
-                  style: pw.TextStyle(font: font, fontSize: 10, color: PdfColors.grey)),
-            )
+                  style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey)),
+            ),
           ],
         ),
+        build: (context) => [
+          // Time Entries Section
+          pw.Text("Time Entries",
+              style: pw.TextStyle(font: font, fontSize: 14, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 4),
+          ...timeEntries.map((t) => pw.Container(
+            margin: const pw.EdgeInsets.only(bottom: 2),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Expanded(child: pw.Text(t.description, style: pw.TextStyle(font: font, fontSize: 12))),
+                pw.Text("${t.hours}h × ₹${t.rate} = ₹${t.total}", style: pw.TextStyle(font: font, fontSize: 12)),
+              ],
+            ),
+          )),
+          pw.SizedBox(height: 8),
+
+          // Expenses Section
+          pw.Text("Expenses",
+              style: pw.TextStyle(font: font, fontSize: 14, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 4),
+          ...expenses.map((e) => pw.Container(
+            margin: const pw.EdgeInsets.only(bottom: 2),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Expanded(child: pw.Text(e.title, style: pw.TextStyle(font: font, fontSize: 12))),
+                pw.Text("₹${e.amount}", style: pw.TextStyle(font: font, fontSize: 12)),
+              ],
+            ),
+          )),
+          pw.SizedBox(height: 8),
+
+          // Total section
+          pw.Divider(),
+          pw.SizedBox(height: 4),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text("Total", style: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold, fontSize: 12)),
+              pw.Text("₹${invoice.totalAmount.toStringAsFixed(2)}",
+                  style: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold, fontSize: 12)),
+            ],
+          ),
+        ],
       ),
     );
 

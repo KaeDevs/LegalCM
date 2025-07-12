@@ -9,7 +9,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:archive/archive_io.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'package:synchronized/synchronized.dart';
 import '../../data/models/case_model.dart';
 import '../../data/models/client_model.dart';
 import '../../data/models/expense_model.dart';
@@ -19,6 +19,9 @@ import '../../data/models/time_entry_model.dart';
 import '../../data/models/user_model.dart';
 
 class LoginController extends GetxController {
+  final _backupLock = Lock();
+  
+
   final GoogleSignIn googleSignIn = GoogleSignIn(
     scopes: [
       'email',
@@ -229,134 +232,119 @@ Future<void> signOut() async {
   /// Backup all Hive box files to a zip and upload to Google Drive
   /// Backup all Hive box files to a zip and upload to Google Drive
 Future<void> backupToDrive(GoogleAuthClient client) async {
-  try {
-    // Flush all boxes first
-    if (Hive.isBoxOpen('user')) await Hive.box<UserModel>('user').flush();
-    if (Hive.isBoxOpen('cases')) await Hive.box<CaseModel>('cases').flush();
-    if (Hive.isBoxOpen('clients')) await Hive.box<ClientModel>('clients').flush();
-    if (Hive.isBoxOpen('tasks')) await Hive.box<TaskModel>('tasks').flush();
-    if (Hive.isBoxOpen('time_entries')) await Hive.box<TimeEntryModel>('time_entries').flush();
-    if (Hive.isBoxOpen('expenses')) await Hive.box<ExpenseModel>('expenses').flush();
-    if (Hive.isBoxOpen('invoices')) await Hive.box<InvoiceModel>('invoices').flush();
-
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    // Get Hive directory
-    final hiveDir = await getApplicationDocumentsDirectory();
-    final hivePath = hiveDir.path;
-    final zipFile = File('${hivePath}/$driveBackupFileName');
-
-    // Delete existing zip file if it exists
-    if (await zipFile.exists()) {
-      await zipFile.delete();
-    }
-
-    // Create archive manually using Archive class
-    final archive = Archive();
-    final dir = Directory(hivePath);
-    bool hasFiles = false;
-    int totalOriginalSize = 0;
-
-    print('Creating archive from Hive files:');
-    await for (var entity in dir.list()) {
-      if (entity is File && entity.path.endsWith('.hive')) {
-        final file = File(entity.path);
-        final fileBytes = await file.readAsBytes();
-        final fileName = file.path.split('/').last;
-        
-        print('Adding ${fileName} (${fileBytes.length} bytes)');
-        totalOriginalSize += fileBytes.length;
-        
-        // Create ArchiveFile with the file data
-        final archiveFile = ArchiveFile(fileName, fileBytes.length, fileBytes);
-        archive.addFile(archiveFile);
-        hasFiles = true;
-      }
-    }
-
-    if (!hasFiles) {
-      throw Exception('No Hive files found to backup');
-    }
-
-    print('Total original files size: $totalOriginalSize bytes');
-
-    // Encode archive to zip format
-    final zipEncoder = ZipEncoder();
-    final zipData = zipEncoder.encode(archive);
-    
-    if (zipData == null || zipData.isEmpty) {
-      throw Exception('Failed to create zip data - encoder returned null/empty');
-    }
-
-    print('Zip data created: ${zipData.length} bytes');
-
-    // Write zip file
-    await zipFile.writeAsBytes(zipData);
-    
-    // Verify the file was written
-    if (!await zipFile.exists()) {
-      throw Exception('Zip file was not created on disk');
-    }
-
-    final zipSize = await zipFile.length();
-    print('Zip file written to disk: $zipSize bytes');
-
-    if (zipSize < 50) { // Even an empty zip should be larger than this
-      throw Exception('Zip file is too small ($zipSize bytes), likely corrupt');
-    }
-
-    // Test read the zip file to make sure it's valid
+  await _backupLock.synchronized(() async {
     try {
-      final testBytes = await zipFile.readAsBytes();
-      final testArchive = ZipDecoder().decodeBytes(testBytes);
-      print('Zip validation: ${testArchive.files.length} files in archive');
-      for (final file in testArchive.files) {
-        print('  - ${file.name}: ${file.size} bytes');
+      // Flush all boxes
+      if (Hive.isBoxOpen('user')) await Hive.box<UserModel>('user').flush();
+      if (Hive.isBoxOpen('cases')) await Hive.box<CaseModel>('cases').flush();
+      if (Hive.isBoxOpen('clients')) await Hive.box<ClientModel>('clients').flush();
+      if (Hive.isBoxOpen('tasks')) await Hive.box<TaskModel>('tasks').flush();
+      if (Hive.isBoxOpen('time_entries')) await Hive.box<TimeEntryModel>('time_entries').flush();
+      if (Hive.isBoxOpen('expenses')) await Hive.box<ExpenseModel>('expenses').flush();
+      if (Hive.isBoxOpen('invoices')) await Hive.box<InvoiceModel>('invoices').flush();
+
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Hive directory
+      final hiveDir = await getApplicationDocumentsDirectory();
+      final hivePath = hiveDir.path;
+
+      // Use temp filename to avoid conflict
+      final tempFileName = 'temp_${DateTime.now().millisecondsSinceEpoch}_$driveBackupFileName';
+      final zipFile = File('$hivePath/$tempFileName');
+
+      final archive = Archive();
+      final dir = Directory(hivePath);
+      bool hasFiles = false;
+      int totalOriginalSize = 0;
+
+      await for (var entity in dir.list()) {
+        if (entity is File && entity.path.endsWith('.hive')) {
+          final file = File(entity.path);
+          final fileBytes = await file.readAsBytes();
+          final fileName = file.path.split('/').last;
+
+          totalOriginalSize += fileBytes.length;
+
+          final archiveFile = ArchiveFile(fileName, fileBytes.length, fileBytes);
+          archive.addFile(archiveFile);
+          hasFiles = true;
+        }
       }
-    } catch (e) {
-      print('Zip validation failed: $e');
-      throw Exception('Created zip file is invalid: $e');
-    }
 
-    // Upload to Google Drive
-    final driveApi = drive.DriveApi(client);
-    
-    final fileList = await driveApi.files
-        .list(q: "name='$driveBackupFileName' and trashed=false");
-    
-    drive.File? backupFile;
-    if (fileList.files != null && fileList.files!.isNotEmpty) {
-      backupFile = fileList.files!.first;
-    }
+      if (!hasFiles) {
+        throw Exception('No Hive files found to backup');
+      }
 
-    final media = drive.Media(zipFile.openRead(), zipSize);
-    
-    if (backupFile != null) {
-      await driveApi.files.update(
-        drive.File(),
-        backupFile.id!,
-        uploadMedia: media,
+      final zipEncoder = ZipEncoder();
+      final zipData = zipEncoder.encode(archive);
+
+      if (zipData == null || zipData.isEmpty) {
+        throw Exception('Failed to create zip data - encoder returned null/empty');
+      }
+
+      await zipFile.writeAsBytes(zipData);
+
+      if (!await zipFile.exists()) {
+        throw Exception('Zip file was not created on disk');
+      }
+
+      final zipSize = await zipFile.length();
+      if (zipSize < 50) {
+        throw Exception('Zip file is too small ($zipSize bytes), likely corrupt');
+      }
+
+      // Zip validation
+      try {
+        final testBytes = await zipFile.readAsBytes();
+        final testArchive = ZipDecoder().decodeBytes(testBytes);
+        if (testArchive.files.isEmpty) {
+          throw Exception('Zip file is invalid or empty');
+        }
+      } catch (e) {
+        throw Exception('Zip validation failed: $e');
+      }
+
+      // Upload to Google Drive
+      final driveApi = drive.DriveApi(client);
+      final fileList = await driveApi.files.list(
+        q: "name='$driveBackupFileName' and trashed=false",
       );
-      print('Updated existing backup on Google Drive');
-    } else {
-      final newFile = drive.File();
-      newFile.name = driveBackupFileName;
-      newFile.description = 'LegalCM Hive Database Backup - Created ${DateTime.now().toIso8601String()}';
-      await driveApi.files.create(newFile, uploadMedia: media);
-      print('Created new backup on Google Drive');
-    }
 
-    // Clean up local zip file
-    if (await zipFile.exists()) {
-      await zipFile.delete();
-    }
+      drive.File? existingFile;
+      if (fileList.files != null && fileList.files!.isNotEmpty) {
+        existingFile = fileList.files!.first;
+      }
 
-    print('Backup uploaded to Google Drive successfully!');
-  } catch (e) {
-    print('Error backing up to Drive: $e');
-    rethrow;
-  }
+      final media = drive.Media(zipFile.openRead(), zipSize);
+
+      if (existingFile != null) {
+        await driveApi.files.update(
+          drive.File(),
+          existingFile.id!,
+          uploadMedia: media,
+        );
+      } else {
+        final newFile = drive.File()
+          ..name = driveBackupFileName
+          ..description =
+              'LegalCM Hive Database Backup - Created ${DateTime.now().toIso8601String()}';
+        await driveApi.files.create(newFile, uploadMedia: media);
+      }
+
+      // Cleanup temp zip
+      if (await zipFile.exists()) {
+        await zipFile.delete();
+      }
+
+      print('Backup uploaded to Google Drive successfully!');
+    } catch (e) {
+      print('Error backing up to Drive: $e');
+      rethrow;
+    }
+  });
 }
+
 
   /// Restore Hive data from Google Drive backup zip
   Future<void> restoreFromDrive(GoogleAuthClient client) async {

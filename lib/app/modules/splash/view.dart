@@ -14,6 +14,7 @@ class SplashView extends GetView<SplashController> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
+                width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -31,7 +32,7 @@ class SplashView extends GetView<SplashController> {
             children: [
               // App Logo
               Container(
-                width: double.infinity,
+                width: 120,
                 height: 120,
                 decoration: BoxDecoration(
                   color: Colors.blue.shade100,

@@ -217,8 +217,13 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
                     final dir = await getTemporaryDirectory();
                     final file = File('${dir.path}/invoice_${invoice.id}.pdf');
                     await file.writeAsBytes(pdfData);
-                    await Share.shareXFiles([XFile(file.path)],
-                        text: "Invoice #${invoice.id}");
+                    await SharePlus.instance.share(
+                       ShareParams(
+    files: [XFile(file.path)],
+    text: "Invoice #${invoice.id}",
+    subject: "LegalCM Invoice",
+  
+                    ));
                   },
                 ),
               ],

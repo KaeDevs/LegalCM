@@ -62,8 +62,10 @@ class AboutPage extends StatelessWidget {
             _buildClickableTile(
               "💼 LinkedIn",
               "Kavin M",
-              "https://www.linkedin.com/in/kavin-m--/",
+              "https://www.linkedin.com/in/kavin-m--",
+              context,
             ),
+            
           ],
         ),
       ),
@@ -84,7 +86,7 @@ class AboutPage extends StatelessWidget {
     );
   }
 
-  Widget _buildClickableTile(String label, String value, String url) {
+  Widget _buildClickableTile(String label, String value, String url, BuildContext context) {
     return ListTile(
       leading: Icon(Icons.link, color: Colors.blueAccent),
       title: Text(
@@ -93,16 +95,70 @@ class AboutPage extends StatelessWidget {
       ),
       subtitle: InkWell(
         onTap: () async {
-          final Uri uri = Uri.parse(url);
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri);
-          } else {
-            // print("Could not launch $url");
-          }
+          await _launchURL(url, context);
         },
         child: Text(
           value,
-          style: TextStyle(color: Colors.blue, fontSize: 18),
+          style: TextStyle(
+            color: Colors.blue,
+            fontSize: 18,
+            decoration: TextDecoration.underline,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchURL(String url, BuildContext context) async {
+    try {
+      final Uri uri = Uri.parse(url);
+      
+      // First try to launch with external application mode
+      if (await canLaunchUrl(uri)) {
+        final bool launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+        
+        if (!launched) {
+          // If external application fails, try in-app browser
+          final bool launchedInApp = await launchUrl(
+            uri,
+            mode: LaunchMode.inAppWebView,
+          );
+          
+          if (!launchedInApp) {
+            _showErrorSnackBar(context, "Could not launch $url");
+          }
+        }
+      } else {
+        // If canLaunchUrl returns false, try alternative approach
+        final bool launched = await launchUrl(
+          uri,
+          mode: LaunchMode.platformDefault,
+        );
+        
+        if (!launched) {
+          _showErrorSnackBar(context, "No app found to open $url");
+        }
+      }
+    } catch (e) {
+      _showErrorSnackBar(context, "Error launching URL: $e");
+    }
+  }
+
+  void _showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Copy URL',
+          textColor: Colors.white,
+          onPressed: () {
+            // You can add clipboard functionality here if needed
+          },
         ),
       ),
     );

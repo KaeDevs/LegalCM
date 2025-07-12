@@ -258,12 +258,14 @@ class _ProfilePageState extends State<ProfilePage> {
                               );
                               if (confirm == true) {
                                 // Show loading dialog
-                                showDialog(
-                                  context: context,
+                                Get.dialog(
+                                  // context: context,
                                   barrierDismissible: false,
-                                  builder: (context) => const _ClearDataLoadingDialog(),
+                                  // builder: (context) => 
+                                  const _ClearDataLoadingDialog(),
                                 );
-                                final loginController = Get.put(LoginController());
+                                // final loginController = Get.put(LoginController());
+                                final loginController = Get.find<LoginController>();
                                 final googleUser = await loginController.googleSignIn.signInSilently();
                                 if (googleUser != null) {
                                   final authHeaders = await googleUser.authHeaders;

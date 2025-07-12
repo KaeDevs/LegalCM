@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 class Tools {
   // Headings (Theme-based colors)
   static TextStyle H1(BuildContext context,) {
-    final textScale = MediaQuery.of(context).textScaleFactor;
+    final textScale = MediaQuery.of(context).textScaler;
     return TextStyle(
     
-        fontSize: 30 * textScale,
+        fontSize: 30 * textScale.scale(30)  ,
         fontWeight: FontWeight.bold,
         color: Theme.of(context).textTheme.titleLarge?.color,
       );
