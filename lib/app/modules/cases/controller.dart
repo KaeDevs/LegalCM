@@ -60,7 +60,7 @@ class CasesController extends GetxController {
     super.onClose();
   }
 
-  // Filter and sort logic
+
   List<CaseModel> _filterAndSortCases(List<CaseModel> cases) {
     RxList<CaseModel> filtered = cases.where((c) {
       // Text search - search in multiple fields

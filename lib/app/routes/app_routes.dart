@@ -1,13 +1,13 @@
 import 'package:get/get.dart';
 import 'package:legalcm/app/modules/billing/add_time_entry_view.dart';
 import 'package:legalcm/app/modules/billing/expense/expense_list_view.dart';
-import 'package:legalcm/app/modules/billing/invoice/invoiceListView.dart';
+import 'package:legalcm/app/modules/billing/invoice/invoice_list_view.dart';
 import 'package:legalcm/app/modules/cases/add_cases_view.dart';
 import 'package:legalcm/app/modules/dashboard/binding.dart';
 import '../modules/billing/billing_overview_view.dart';
 import '../modules/billing/expense/add_expense_view.dart';
-import '../modules/billing/invoice/addInvoiceView.dart';
-import '../modules/billing/timeEntry/timeEntryListView.dart';
+import '../modules/billing/invoice/add_invoice_view.dart';
+import '../modules/billing/timeEntry/time_entry_listview.dart';
 import '../modules/cases/case_binding.dart';
 import '../modules/clients/add_client_view.dart';
 import '../modules/clients/client_binding.dart';
@@ -44,7 +44,7 @@ class AppPages {
     GetPage(
       name: '/dashboard',
       page: () => DashboardView(),
-      bindings: [dashBoardBinding(),LoginBinding()],
+      bindings: [DashBoardBinding(),LoginBinding()],
       // transition: Transition.,
       transitionDuration: const Duration(milliseconds: 250),
     ),

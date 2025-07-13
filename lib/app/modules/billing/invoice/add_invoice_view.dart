@@ -16,8 +16,8 @@ class AddInvoiceView extends StatefulWidget {
 
 class _AddInvoiceViewState extends State<AddInvoiceView> {
   String? _selectedCaseId;
-  List<String> _selectedTimeEntryIds = [];
-  List<String> _selectedExpenseIds = [];
+  final List<String> _selectedTimeEntryIds = [];
+  final List<String> _selectedExpenseIds = [];
 
   @override
   Widget build(BuildContext context) {

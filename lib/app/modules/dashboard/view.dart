@@ -14,10 +14,9 @@ import 'package:share_plus/share_plus.dart';
 import '../../data/models/case_model.dart';
 import '../../data/models/client_model.dart';
 import '../../data/models/task_model.dart';
-import '../../services/app_update.dart';
 import '../tasks/task_detail_view.dart';
 import 'profile_page.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+
 
 class DashboardView extends GetView<DashBoardController> {
 
@@ -25,7 +24,7 @@ class DashboardView extends GetView<DashBoardController> {
 
   Future<void> _handleBackup(BuildContext context) async {
   final loginController = Get.find<LoginController>(); 
-  BuildContext currentContext = context;
+  // BuildContext currentContext = context;
 
   // Record when backup starts
   final startTime = DateTime.now();
@@ -53,19 +52,35 @@ class DashboardView extends GetView<DashBoardController> {
     GoogleSignInAccount? googleUser;
 
     try {
+      // Use a mounted check to avoid using BuildContext across async gaps
+      final mounted = Get.isRegistered<DashboardView>();
       googleUser = await loginController.googleSignIn.signInSilently();
+      if (!(Get.isDialogOpen ?? false)) return;
       if (googleUser == null) {
-        return _showError(currentContext, 'Please sign in to Google Drive first', startTime);
+        if (mounted) return _showError(Get.context!, 'Please sign in to Google Drive first', startTime);
+        return;
       }
     } on PlatformException catch (e) {
+      if (!(Get.isDialogOpen ?? false)) return;
       if (e.code == 'network_error') {
-        return _showError(currentContext, 'No internet connection. Please check your network.', startTime);
+        if (Get.isRegistered<DashboardView>()) {
+          return _showError(Get.context!, 'No internet connection. Please check your network.', startTime);
+        }
+        return;
       }
       rethrow;
     } on SocketException {
-      return _showError(currentContext, 'Network connection failed.', startTime);
+      if (!(Get.isDialogOpen ?? false)) return;
+      if (Get.isRegistered<DashboardView>()) {
+        return _showError(Get.context!, 'Network connection failed.', startTime);
+      }
+      return;
     } on TimeoutException {
-      return _showError(currentContext, 'Connection timed out.', startTime);
+      if (!(Get.isDialogOpen ?? false)) return;
+      if (Get.isRegistered<DashboardView>()) {
+        return _showError(Get.context!, 'Connection timed out.', startTime);
+      }
+      return;
     }
 
     try {
@@ -73,16 +88,32 @@ class DashboardView extends GetView<DashBoardController> {
       final client = GoogleAuthClient(authHeaders);
       await loginController.backupToDrive(client);
     } on PlatformException catch (e) {
+      if (!(Get.isDialogOpen ?? false)) return;
       if (e.code == 'network_error') {
-        return _showError(currentContext, 'Network error during backup.', startTime);
+        if (Get.isRegistered<DashboardView>()) {
+          return _showError(Get.context!, 'Network error during backup.', startTime);
+        }
+        return;
       }
       rethrow;
     } on SocketException {
-      return _showError(currentContext, 'Network error during backup.', startTime);
+      if (!(Get.isDialogOpen ?? false)) return;
+      if (Get.isRegistered<DashboardView>()) {
+        return _showError(Get.context!, 'Network error during backup.', startTime);
+      }
+      return;
     } on TimeoutException {
-      return _showError(currentContext, 'Backup timed out.', startTime);
+      if (!(Get.isDialogOpen ?? false)) return;
+      if (Get.isRegistered<DashboardView>()) {
+        return _showError(Get.context!, 'Backup timed out.', startTime);
+      }
+      return;
     } on HttpException {
-      return _showError(currentContext, 'Server error occurred.', startTime);
+      if (!(Get.isDialogOpen ?? false)) return;
+      if (Get.isRegistered<DashboardView>()) {
+        return _showError(Get.context!, 'Server error occurred.', startTime);
+      }
+      return;
     }
 
     await _closeDialogAfterMinimumDuration(startTime);
@@ -150,7 +181,7 @@ Future<void> _closeDialogAfterMinimumDuration(DateTime startTime) async {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
+    // final size = MediaQuery.of(context).size;
     
 
 
@@ -531,7 +562,7 @@ class NormalCard extends StatelessWidget {
   final VoidCallback onTap;
   final Color color;
 
-  NormalCard({
+  const NormalCard({
     super.key,
     required this.title,
     // required this.value,

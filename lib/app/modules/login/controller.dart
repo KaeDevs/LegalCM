@@ -6,7 +6,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:archive/archive_io.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:synchronized/synchronized.dart';
@@ -57,7 +56,7 @@ class LoginController extends GetxController {
         });
       }
     } catch (e) {
-      print('Error checking login status: $e');
+      //    print('Error checking login status: $e');
     }
   }
 
@@ -65,18 +64,18 @@ class LoginController extends GetxController {
     try {
       isLoading.value = true;
 
-      print('Starting Google Sign-In process...');
+      // print('Starting Google Sign-In process...');
 
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
-        print('User cancelled Google Sign-In');
+        // print('User cancelled Google Sign-In');
         isLoading.value = false;
         return;
       }
 
-      print('Google Sign-In successful for: ${googleUser.email}');
+      // print('Google Sign-In successful for: ${googleUser.email}');
 
       // Obtain the auth details from the request
       final GoogleSignInAuthentication googleAuth =
@@ -90,7 +89,7 @@ class LoginController extends GetxController {
         idToken: googleAuth.idToken,
       );
 
-      print('Created Firebase credential, signing in...');
+      // print('Created Firebase credential, signing in...');
 
       // Sign in to Firebase with the credential
       final UserCredential userCredential =
@@ -98,7 +97,7 @@ class LoginController extends GetxController {
       final User? user = userCredential.user;
 
       if (user != null) {
-        print('Firebase authentication successful for: ${user.email}');
+        // print('Firebase authentication successful for: ${user.email}');
 
         // Save user data to Hive
         await _saveUserToHive(user, googleUser);
@@ -107,8 +106,8 @@ class LoginController extends GetxController {
         try {
           await restoreFromDrive(client);
         } catch (e) {
-          print(
-              'No backup found or error restoring from Drive: ${e.toString()}');
+          // print(
+          //     'No backup found or error restoring from Drive: ${e.toString()}');
         }
 
         // Ensure all boxes are open before proceeding
@@ -117,7 +116,7 @@ class LoginController extends GetxController {
         isLoggedIn.value = true;
         isLoading.value = false;
       } else {
-        print('Firebase authentication failed - no user returned');
+        // print('Firebase authentication failed - no user returned');
         isLoading.value = false;
         Get.snackbar(
           'Error',
@@ -126,7 +125,7 @@ class LoginController extends GetxController {
         );
       }
     } catch (e) {
-      print('Google Sign-In error: $e');
+      // print('Google Sign-In error: $e');
       isLoading.value = false;
 
       String errorMessage = 'Failed to sign in with Google';
@@ -185,9 +184,9 @@ Future<void> _saveUserToHive(
     );
 
     await userBox.put('current_user', userModel);
-    print('User data saved to Hive successfully');
+    // print('User data saved to Hive successfully');
   } catch (e) {
-    print('Error saving user to Hive: $e');
+    // print('Error saving user to Hive: $e');
   }
 }
 
@@ -220,7 +219,7 @@ Future<void> signOut() async {
       Get.offAllNamed('/login');
     });
   } catch (e) {
-    print('Error signing out: $e');
+    // print('Error signing out: $e');
     Get.snackbar(
       'Error',
       'Failed to sign out: ${e.toString()}',
@@ -256,6 +255,7 @@ Future<void> backupToDrive(GoogleAuthClient client) async {
       final archive = Archive();
       final dir = Directory(hivePath);
       bool hasFiles = false;
+      // ignore: unused_local_variable
       int totalOriginalSize = 0;
 
       await for (var entity in dir.list()) {
@@ -337,9 +337,9 @@ Future<void> backupToDrive(GoogleAuthClient client) async {
         await zipFile.delete();
       }
 
-      print('Backup uploaded to Google Drive successfully!');
+      // print('Backup uploaded to Google Drive successfully!');
     } catch (e) {
-      print('Error backing up to Drive: $e');
+      // print('Error backing up to Drive: $e');
       rethrow;
     }
   });
@@ -384,7 +384,7 @@ Future<void> backupToDrive(GoogleAuthClient client) async {
         final outFile = File('${hivePath}/${file.name}');
         await outFile.writeAsBytes(file.content as List<int>);
       }
-      print('Hive data restored from Drive!');
+      // print('Hive data restored from Drive!');
 
       // 4. Re-open all boxes with the correct type
       await Hive.openBox<UserModel>('user');
@@ -395,7 +395,7 @@ Future<void> backupToDrive(GoogleAuthClient client) async {
       await Hive.openBox<ExpenseModel>('expenses');
       await Hive.openBox<InvoiceModel>('invoices');
     } catch (e) {
-      print('Error restoring from Drive: $e');
+      // print('Error restoring from Drive: $e');
       rethrow;
     }
   }
@@ -409,10 +409,10 @@ Future<void> backupToDrive(GoogleAuthClient client) async {
       if (fileList.files != null && fileList.files!.isNotEmpty) {
         final backupFile = fileList.files!.first;
         await driveApi.files.delete(backupFile.id!);
-        print('Backup deleted from Google Drive!');
+        // print('Backup deleted from Google Drive!');
       }
     } catch (e) {
-      print('Error deleting backup from Drive: $e');
+      // print('Error deleting backup from Drive: $e');
       rethrow;
     }
   }

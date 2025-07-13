@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:collection/collection.dart';
 import '../../../utils/font_styles.dart';
 
 import '../../../data/models/invoice_model.dart';
 import '../../../data/models/case_model.dart';
-import 'invoiceDetailView.dart';
+import 'invoice_detail_view.dart';
 
 class InvoiceListView extends StatelessWidget {
   const InvoiceListView({super.key});

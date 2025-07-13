@@ -143,7 +143,7 @@ class CasesView extends StatelessWidget {
                     label: Text('$status ($count)'),
                     selected: isSelected,
                     onSelected: (_) => controller.updateStatusFilter(status),
-                    selectedColor: colorScheme.primary.withOpacity(0.2),
+                    selectedColor: colorScheme.primary.withValues(alpha: 0.2),
                     checkmarkColor: colorScheme.primary,
                   ),
                 );

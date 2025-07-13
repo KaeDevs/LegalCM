@@ -3,7 +3,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
 
 import '../../services/app_update.dart';
 import '../tasks/task_controller.dart';
@@ -50,8 +49,8 @@ class DashBoardController extends GetxController{
 
   @override
   void onInit() {
-    // TODO: implement onInit
-    print("start dashboard");
+  
+    // print("start dashboard");
     checkForUpdate();
     Get.put(TaskController());
     
@@ -70,9 +69,9 @@ class DashBoardController extends GetxController{
     try {
       final results = await _connectivity.checkConnectivity();
       _updateConnectionStatus(results);
-      print("Initial connectivity check: $results -> isConnected: ${isConnected.value}");
+      // print("Initial connectivity check: $results -> isConnected: ${isConnected.value}");
     } catch (e) {
-      print("Error checking initial connectivity: $e");
+      // print("Error checking initial connectivity: $e");
       isConnected.value = false;
     }
   }
@@ -81,9 +80,9 @@ class DashBoardController extends GetxController{
     try {
       final results = await _connectivity.checkConnectivity();
       _updateConnectionStatus(results);
-      print("Manual connectivity refresh: $results -> isConnected: ${isConnected.value}");
+      // print("Manual connectivity refresh: $results -> isConnected: ${isConnected.value}");
     } catch (e) {
-      print("Error refreshing connectivity: $e");
+      // print("Error refreshing connectivity: $e");
       isConnected.value = false;
     }
   }

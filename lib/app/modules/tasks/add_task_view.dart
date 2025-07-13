@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import '../../data/models/task_model.dart';
 import '../../data/models/case_model.dart';
-import '../../services/notification_service.dart';
 import 'task_controller.dart';
 
 class AddTaskView extends StatefulWidget {
@@ -19,7 +18,7 @@ class _AddTaskViewState extends State<AddTaskView> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   DateTime _dueDate = DateTime.now();
-  bool _hasReminder = false;
+  final bool _hasReminder = false;//could be used later
   String? _selectedCaseId;
 
   final caseList = Hive.box<CaseModel>('cases').values.toList();

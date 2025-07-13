@@ -216,21 +216,21 @@ class _ProfilePageState extends State<ProfilePage> {
                               leading: Icon(Icons.phone,
                                   color: theme.colorScheme.primary),
                               title: const Text('Phone'),
-                              subtitle: Text(user!.phone ?? ''),
+                              subtitle: Text(user!.phone),
                             ),
                           if ((user!.city ?? '').trim().isNotEmpty)
                             ListTile(
                               leading: Icon(Icons.location_city,
                                   color: theme.colorScheme.primary),
                               title: const Text('City'),
-                              subtitle: Text(user!.city ?? ''),
+                              subtitle: Text(user!.city),
                             ),
                           if ((user!.state ?? '').trim().isNotEmpty)
                             ListTile(
                               leading: Icon(Icons.location_on,
                                   color: theme.colorScheme.primary),
                               title: const Text('State'),
-                              subtitle: Text(user!.state ?? ''),
+                              subtitle: Text(user!.state),
                             ),
                           const SizedBox(height: 24),
                           ElevatedButton.icon(
@@ -276,10 +276,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 await Hive.deleteFromDisk();
                                 await loginController.ensureAllBoxesOpen();
                                 await loginController.signOut();
-                                // Close loading dialog
-                                if (Navigator.of(context, rootNavigator: true).canPop()) {
-                                  Navigator.of(context, rootNavigator: true).pop();
-                                }
+                                
                                 Get.snackbar('Data Cleared', 'All local and Drive backup data deleted. You have been signed out.', snackPosition: SnackPosition.BOTTOM);
                               }
                             },

@@ -67,9 +67,9 @@ class _AddCaseViewState extends State<AddCaseView> {
     if (_formKey.currentState!.validate() && _selectedClient != null) {
       if (_attachedFiles.isNotEmpty) {
         // Text('${_attachedFiles.length} files attached');}
-        print("Attached");
+        // print("Attached");
       } else {
-        print("Not Attached");
+        // print("Not Attached");
       }
 
       if (widget.existingCase != null) {
