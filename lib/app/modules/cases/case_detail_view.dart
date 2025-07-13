@@ -50,6 +50,7 @@ class CaseDetailView extends StatelessWidget {
     final textTheme = theme.textTheme;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(title: const Text('Case Details')),
       body: Padding(
         padding: const EdgeInsets.all(16),

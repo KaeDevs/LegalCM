@@ -6,8 +6,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../data/models/invoice_model.dart';
+import '../../../utils/font_styles.dart';
 import '../../../data/models/time_entry_model.dart';
 import '../../../data/models/expense_model.dart';
 import '../../../data/models/case_model.dart';
@@ -58,7 +58,7 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
       appBar: AppBar(
         title: Text(
           "Invoice #${invoice.id.substring(0, 8)}...",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          style: FontStyles.poppins(fontWeight: FontWeight.w600),
         ),
         actions: [
           IconButton(
@@ -66,20 +66,20 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
             onPressed: () async {
               final confirm = await Get.dialog<bool>(
                 AlertDialog(
-                  title: Text("Delete Invoice", style: GoogleFonts.poppins()),
+                  title: Text("Delete Invoice", style: FontStyles.poppins()),
                   content: Text(
                     "Are you sure you want to delete this invoice?",
-                    style: GoogleFonts.poppins(),
+                    style: FontStyles.poppins(),
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Get.back(result: false),
-                      child: Text("Cancel", style: GoogleFonts.poppins()),
+                      child: Text("Cancel", style: FontStyles.poppins()),
                     ),
                     TextButton(
                       onPressed: () => Get.back(result: true),
                       child: Text("Delete",
-                          style: GoogleFonts.poppins(
+                          style: FontStyles.poppins(
                               color: Colors.red, fontWeight: FontWeight.bold)),
                     ),
                   ],
@@ -100,7 +100,7 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
         child: ListView(
           children: [
             Text("Case: $caseTitle",
-                style: GoogleFonts.poppins(
+                style: FontStyles.poppins(
                     fontSize: 20, fontWeight: FontWeight.w600)),
             const SizedBox(height: 24),
 
@@ -110,7 +110,7 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
                 const Icon(Icons.timer, color: Colors.blue),
                 const SizedBox(width: 8),
                 Text("Time Entries",
-                    style: GoogleFonts.poppins(
+                    style: FontStyles.poppins(
                         fontWeight: FontWeight.w600, fontSize: 17)),
               ],
             ),
@@ -119,13 +119,13 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
               (t) => Card(
                 child: ListTile(
                   title: Text(t.description,
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                      style: FontStyles.poppins(fontWeight: FontWeight.w500)),
                   subtitle: Text(
                     "${t.date.toLocal().toString().split(' ')[0]} • ${t.hours} hrs @ ₹${t.rate}/hr",
-                    style: GoogleFonts.poppins(fontSize: 13),
+                    style: FontStyles.poppins(fontSize: 13),
                   ),
                   trailing: Text("₹${t.total.toStringAsFixed(2)}",
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                      style: FontStyles.poppins(fontWeight: FontWeight.w600)),
                 ),
               ),
             ),
@@ -134,7 +134,7 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text("No time entries",
                     style:
-                        GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
+                        FontStyles.poppins(fontSize: 13, color: Colors.grey)),
               ),
 
             const SizedBox(height: 24),
@@ -145,7 +145,7 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
                 const Icon(Icons.money, color: Colors.green),
                 const SizedBox(width: 8),
                 Text("Expenses",
-                    style: GoogleFonts.poppins(
+                    style: FontStyles.poppins(
                         fontWeight: FontWeight.w600, fontSize: 17)),
               ],
             ),
@@ -154,10 +154,10 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
               (e) => Card(
                 child: ListTile(
                   title: Text(e.title,
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                      style: FontStyles.poppins(fontWeight: FontWeight.w500)),
                   subtitle: Text(
                       "${e.date.toLocal().toString().split(' ')[0]} • ₹${e.amount.toStringAsFixed(2)}",
-                      style: GoogleFonts.poppins(fontSize: 13)),
+                      style: FontStyles.poppins(fontSize: 13)),
                   trailing: const Icon(Icons.receipt_long),
                 ),
               ),
@@ -167,7 +167,7 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text("No expenses",
                     style:
-                        GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
+                        FontStyles.poppins(fontSize: 13, color: Colors.grey)),
               ),
 
             const Divider(height: 32),
@@ -175,16 +175,16 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
             /// Total
             ListTile(
               title: Text("Total Amount",
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                  style: FontStyles.poppins(fontWeight: FontWeight.w600)),
               trailing: Text("₹${invoice.totalAmount.toStringAsFixed(2)}",
-                  style: GoogleFonts.poppins(
+                  style: FontStyles.poppins(
                       fontWeight: FontWeight.bold, fontSize: 16)),
             ),
 
             /// Paid Switch
             SwitchListTile(
               title: Text("Mark as Paid",
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                  style: FontStyles.poppins(fontWeight: FontWeight.w500)),
               value: invoice.isPaid,
               onChanged: (val) {
                 setState(() {

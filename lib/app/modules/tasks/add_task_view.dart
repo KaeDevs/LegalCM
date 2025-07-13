@@ -71,16 +71,16 @@ class _AddTaskViewState extends State<AddTaskView> {
   await Hive.box<TaskModel>('tasks').add(task);
 
   // ⏰ Schedule Notification
-  if (_hasReminder) {
-    await NotificationService.scheduleNotification(
-      id: id,
-      title: "Reminder: ${task.title}",
-      body: task.description?.isNotEmpty == true
-          ? task.description!
-          : 'Your task is due today!',
-      scheduledDate: _dueDate,
-    );
-  }
+  // if (_hasReminder) {
+  //   await NotificationService.scheduleNotification(
+  //     id: id,
+  //     title: "Reminder: ${task.title}",
+  //     body: task.description?.isNotEmpty == true
+  //         ? task.description!
+  //         : 'Your task is due today!',
+  //     scheduledDate: _dueDate,
+  //   );
+  // }
 
   Get.back();
   Get.snackbar("Success", "Task added successfully!");

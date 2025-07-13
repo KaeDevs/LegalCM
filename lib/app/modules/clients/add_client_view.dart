@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
-// import 'package:google_fonts/google_fonts.dart';
 
 import '../../data/models/client_model.dart';
 

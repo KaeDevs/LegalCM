@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:legalcm/app/modules/cases/controller.dart';
+import '../../utils/font_styles.dart';
 
 import '../../data/models/case_model.dart';
 import 'case_detail_view.dart';
@@ -20,7 +20,7 @@ class CasesView extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           '📁 All Cases',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          style: FontStyles.poppins(fontWeight: FontWeight.w600),
         ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -98,7 +98,7 @@ class CasesView extends StatelessWidget {
               children: [
                 Text(
                   'Showing ${controller.filteredCount} of ${controller.totalCases} cases',
-                  style: GoogleFonts.poppins(
+                  style: FontStyles.poppins(
                     fontSize: 14,
                     color: theme.textTheme.bodyMedium?.color,
                   ),
@@ -204,7 +204,7 @@ class CasesView extends StatelessWidget {
           children: [
             Text(
               'Advanced Filters',
-              style: GoogleFonts.poppins(
+              style: FontStyles.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -286,7 +286,7 @@ class CasesView extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             title,
-            style: GoogleFonts.poppins(
+            style: FontStyles.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Colors.grey[600],
@@ -295,7 +295,7 @@ class CasesView extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: GoogleFonts.poppins(
+            style: FontStyles.poppins(
               fontSize: 14,
               color: Colors.grey[500],
             ),
@@ -324,7 +324,8 @@ class CasesView extends StatelessWidget {
             children: [
               Text(
                 c.title,
-                style: GoogleFonts.oswald(
+                style: TextStyle(
+                  fontFamily: 'oswald',
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: theme.textTheme.titleLarge!.color,
@@ -338,7 +339,7 @@ class CasesView extends StatelessWidget {
                   Expanded(
                     child: Text(
                       c.clientName,
-                      style: GoogleFonts.poppins(
+                      style: FontStyles.poppins(
                         fontSize: 14,
                         color: theme.textTheme.bodyMedium!.color,
                       ),
@@ -354,7 +355,7 @@ class CasesView extends StatelessWidget {
                   Expanded(
                     child: Text(
                       c.court,
-                      style: GoogleFonts.poppins(
+                      style: FontStyles.poppins(
                         fontSize: 14,
                         color: theme.textTheme.bodyMedium!.color,
                       ),
@@ -373,7 +374,7 @@ class CasesView extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         '${c.nextHearing.day}/${c.nextHearing.month}/${c.nextHearing.year}',
-                        style: GoogleFonts.poppins(
+                        style: FontStyles.poppins(
                           fontSize: 13,
                           color: theme.textTheme.bodySmall!.color,
                         ),

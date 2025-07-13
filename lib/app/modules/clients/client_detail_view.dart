@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../utils/font_styles.dart';
 
 import '../../data/models/client_model.dart';
 
@@ -53,7 +53,7 @@ class ClientDetailView extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               client.name,
-              style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold),
+              style: FontStyles.poppins(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             Column(
               children: [
@@ -62,7 +62,7 @@ class ClientDetailView extends StatelessWidget {
                   children: [
                     Text(
                       client.email,
-                      style: GoogleFonts.poppins(
+                      style: FontStyles.poppins(
                         fontSize: 16,
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -85,7 +85,7 @@ class ClientDetailView extends StatelessWidget {
                   children: [
                     Text(
                       client.contactNumber,
-                      style: GoogleFonts.poppins(
+                      style: FontStyles.poppins(
                         fontSize: 16,
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -106,11 +106,11 @@ class ClientDetailView extends StatelessWidget {
             ),
             Text(
               "City: ${client.city}",
-              style: GoogleFonts.poppins(fontSize: 16, color: Theme.of(context).colorScheme.primary,),
+              style: FontStyles.poppins(fontSize: 16, color: Theme.of(context).colorScheme.primary,),
             ),
             Text(
               "State: ${client.state}",
-              style: GoogleFonts.poppins(fontSize: 16, color: Theme.of(context).colorScheme.primary,),
+              style: FontStyles.poppins(fontSize: 16, color: Theme.of(context).colorScheme.primary,),
             ),
             const SizedBox(height: 8),
             Row(

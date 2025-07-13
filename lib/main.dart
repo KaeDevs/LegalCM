@@ -10,7 +10,6 @@ import 'app/data/models/expense_model.dart';
 import 'app/data/models/invoice_model.dart';
 import 'app/data/models/user_model.dart';
 import 'app/routes/app_routes.dart';
-import 'app/services/notification_service.dart';
 import 'app/theme/app_theme.dart';
 
 void main() async {
@@ -20,7 +19,7 @@ void main() async {
   await Firebase.initializeApp();
   
   await Hive.initFlutter();
-  await NotificationService.init();
+  // await NotificationService.init();
 
   Hive.registerAdapter(CaseModelAdapter());
   Hive.registerAdapter(ClientModelAdapter());

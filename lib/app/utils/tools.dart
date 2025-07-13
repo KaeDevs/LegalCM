@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Tools {
   // Headings (Theme-based colors)
-  static TextStyle H1(BuildContext context,) {
+  static TextStyle h1(BuildContext context,) {
     final textScale = MediaQuery.of(context).textScaler;
     return TextStyle(
     
@@ -12,13 +12,13 @@ class Tools {
       );
   }
 
-  static TextStyle H2(BuildContext context) => TextStyle(
+  static TextStyle h2(BuildContext context) => TextStyle(
         fontSize: 27,
         fontWeight: FontWeight.bold,
         color: Theme.of(context).colorScheme.onPrimary,
       );
 
-  static TextStyle H3(BuildContext context) { 
+  static TextStyle h3(BuildContext context) { 
     // final textScale = MediaQuery.of(context).textScaleFactor;
     return TextStyle(
         fontSize: 20,
@@ -39,7 +39,7 @@ class Tools {
     final colorScheme = Theme.of(context).colorScheme;
     return TextButton.styleFrom(
       foregroundColor: isActive ? colorScheme.onSurface : Colors.grey[600],
-      backgroundColor: isActive ? colorScheme.surfaceVariant : Colors.grey[300],
+      backgroundColor: isActive ? colorScheme.surfaceContainerHighest : Colors.grey[300],
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(5),

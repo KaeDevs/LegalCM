@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:collection/collection.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../../../utils/font_styles.dart';
 
 import '../../../data/models/expense_model.dart';
 import '../../../data/models/case_model.dart';
@@ -16,7 +16,7 @@ class ExpenseListView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Expenses", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+        title: Text("Expenses", style: FontStyles.poppins(fontWeight: FontWeight.w600)),
       ),
       body: ValueListenableBuilder(
         valueListenable: Hive.box<ExpenseModel>('expenses').listenable(),
@@ -32,7 +32,7 @@ class ExpenseListView extends StatelessWidget {
             return Center(
               child: Text(
                 "No expenses recorded yet",
-                style: GoogleFonts.poppins(fontSize: 16, color: theme.hintColor),
+                style: FontStyles.poppins(fontSize: 16, color: theme.hintColor),
               ),
             );
           }
@@ -66,13 +66,13 @@ class ExpenseListView extends StatelessWidget {
                     tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     title: Text(
                       caseTitle,
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 20),
+                      style: FontStyles.poppins(fontWeight: FontWeight.w600, fontSize: 20),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         "Total: ₹${totalAmount.toStringAsFixed(2)}",
-                        style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: FontStyles.poppins(fontSize: 17, fontWeight: FontWeight.w600),
                       ),
                     ),
                     children: expenses.map((expense) {
@@ -81,11 +81,11 @@ class ExpenseListView extends StatelessWidget {
                         visualDensity: VisualDensity.adaptivePlatformDensity,
                         title: Text(
                           expense.title,
-                          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+                          style: FontStyles.poppins(fontSize: 16, fontWeight: FontWeight.w500),
                         ),
                         subtitle: Text(
                           "${expense.date.toLocal().toString().split(" ")[0]}",
-                          style: GoogleFonts.poppins(fontSize: 15),
+                          style: FontStyles.poppins(fontSize: 15),
                         ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.redAccent),

@@ -14,7 +14,7 @@ class AboutPage extends StatelessWidget {
         iconTheme: IconThemeData(color: Colors.white),
         title: Text(
           "About Page 🧾",
-          style: Tools.H2(context).copyWith(color: Colors.white),
+          style: Tools.h2(context).copyWith(color: Colors.white),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -38,12 +38,12 @@ class AboutPage extends StatelessWidget {
                   children: [
                     Text(
                       "Developed By:",
-                      style: Tools.H2(context).copyWith(color: Colors.white),
+                      style: Tools.h2(context).copyWith(color: Colors.white),
                     ),
                     const SizedBox(height: 10),
                     Text(
                       "KAVIN M",
-                      style: Tools.H2(context).copyWith(
+                      style: Tools.h2(context).copyWith(
                         color: Colors.white,
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -81,7 +81,7 @@ class AboutPage extends StatelessWidget {
       ),
       subtitle: Text(
         value,
-        style: Tools.H3(context).copyWith(color: Colors.white, fontSize: 18),
+        style: Tools.h3(context).copyWith(color: Colors.white, fontSize: 18),
       ),
     );
   }

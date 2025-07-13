@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'controller.dart';
 
 class SplashView extends GetView<SplashController> {
@@ -55,7 +54,8 @@ class SplashView extends GetView<SplashController> {
               // App Title
               Text(
                 'Legal CM',
-                style: GoogleFonts.poppins(
+                style: TextStyle(
+                  fontFamily: 'poppins',
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey.shade800,
@@ -65,7 +65,8 @@ class SplashView extends GetView<SplashController> {
               // Subtitle
               Text(
                 'Legal Case Manager',
-                style: GoogleFonts.poppins(
+                style: TextStyle(
+                  fontFamily: 'poppins',
                   fontSize: 16,
                   color: Colors.grey.shade600,
                 ),
@@ -84,7 +85,8 @@ class SplashView extends GetView<SplashController> {
               // Loading Text
               Text(
                 'Loading...',
-                style: GoogleFonts.poppins(
+                style: TextStyle(
+                  fontFamily: 'poppins',
                   fontSize: 14,
                   color: Colors.grey.shade500,
                 ),

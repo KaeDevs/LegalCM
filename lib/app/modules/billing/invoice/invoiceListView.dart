@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:collection/collection.dart';
+import '../../../utils/font_styles.dart';
 
 import '../../../data/models/invoice_model.dart';
 import '../../../data/models/case_model.dart';
@@ -18,7 +18,7 @@ class InvoiceListView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("📄 Invoices", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+        title: Text("📄 Invoices", style: FontStyles.poppins(fontWeight: FontWeight.w600)),
       ),
       body: ValueListenableBuilder(
         valueListenable: Hive.box<InvoiceModel>('invoices').listenable(),
@@ -29,7 +29,7 @@ class InvoiceListView extends StatelessWidget {
             return Center(
               child: Text(
                 "No invoices created yet",
-                style: GoogleFonts.poppins(fontSize: 16, color: theme.hintColor),
+                style: FontStyles.poppins(fontSize: 16, color: theme.hintColor),
               ),
             );
           }
@@ -53,13 +53,13 @@ class InvoiceListView extends StatelessWidget {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   title: Text(
                     "Invoice #${invoice.id}",
-                    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: FontStyles.poppins(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
                       "$caseTitle\nDate: ${invoice.invoiceDate.toLocal().toString().split(' ')[0]}\nTotal: ₹${invoice.totalAmount.toStringAsFixed(2)}",
-                      style: GoogleFonts.poppins(fontSize: 15, height: 1.4),
+                      style: FontStyles.poppins(fontSize: 15, height: 1.4),
                     ),
                   ),
                   isThreeLine: true,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../utils/font_styles.dart';
 import 'task_controller.dart';
 import 'task_detail_view.dart';
 
@@ -19,7 +19,7 @@ class TaskListView extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           "📝 Tasks",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          style: FontStyles.poppins(fontWeight: FontWeight.w600),
         ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -64,7 +64,7 @@ class TaskListView extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 title: Text(
                   t.title,
-                  style: GoogleFonts.poppins(
+                  style: FontStyles.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     decoration:

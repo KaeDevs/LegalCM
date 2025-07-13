@@ -25,7 +25,7 @@ class TaskController extends GetxController {
     final allTasks = taskBox.values.toList()
       ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
     tasks.assignAll(allTasks);
-    print('Loaded ${tasks.length} tasks');
+    // print('Loaded ${tasks.length} tasks');
   }
 
   void addTask(TaskModel task) async {

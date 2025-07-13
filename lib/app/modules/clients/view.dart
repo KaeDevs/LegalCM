@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:legalcm/app/modules/clients/controller.dart';
+import '../../utils/font_styles.dart';
 
 import '../../data/models/client_model.dart';
 import 'add_client_view.dart';
@@ -21,7 +21,7 @@ class ClientsView extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           '👥 Clients',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          style: FontStyles.poppins(fontWeight: FontWeight.w600),
         ),
         actions: [
           Obx(() => IconButton(
@@ -105,7 +105,7 @@ class ClientsView extends StatelessWidget {
                   children: [
                     Text(
                       'Showing ${controller.filteredCount} of ${controller.totalClients} clients',
-                      style: GoogleFonts.poppins(
+                      style: FontStyles.poppins(
                         fontSize: 14,
                         color: theme.textTheme.bodyMedium?.color,
                       ),
@@ -189,7 +189,7 @@ class ClientsView extends StatelessWidget {
           children: [
             Text(
               'Advanced Filters',
-              style: GoogleFonts.poppins(
+              style: FontStyles.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -258,7 +258,7 @@ class ClientsView extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             title,
-            style: GoogleFonts.poppins(
+            style: FontStyles.poppins(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Colors.grey[600],
@@ -267,7 +267,7 @@ class ClientsView extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: GoogleFonts.poppins(
+            style: FontStyles.poppins(
               fontSize: 14,
               color: Colors.grey[500],
             ),
@@ -313,7 +313,7 @@ class ClientsView extends StatelessWidget {
                   children: [
                     Text(
                       client.name,
-                      style: GoogleFonts.poppins(
+                      style: FontStyles.poppins(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
@@ -326,7 +326,7 @@ class ClientsView extends StatelessWidget {
                         Expanded(
                           child: Text(
                             client.email,
-                            style: GoogleFonts.poppins(
+                            style: FontStyles.poppins(
                               fontSize: 13,
                               color: Colors.grey[600],
                             ),
@@ -342,7 +342,7 @@ class ClientsView extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           client.contactNumber,
-                          style: GoogleFonts.poppins(
+                          style: FontStyles.poppins(
                             fontSize: 13,
                             color: Colors.grey[600],
                           ),
@@ -445,7 +445,7 @@ class ClientsView extends StatelessWidget {
           children: [
             Text(
               'Recent Clients',
-              style: GoogleFonts.poppins(
+              style: FontStyles.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),

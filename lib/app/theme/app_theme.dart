@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   static final lightTheme = ThemeData(
@@ -23,7 +22,9 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
       ),
     ),
-    textTheme: GoogleFonts.poppinsTextTheme(), // Apply Poppins globally
+    textTheme: ThemeData.light().textTheme.apply(
+      fontFamily: 'poppins',
+    ),
   );
 
   static final darkTheme = ThemeData(
@@ -47,6 +48,8 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
       ),
     ),
-    textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
+    textTheme: ThemeData.dark().textTheme.apply(
+      fontFamily: 'poppins',
+    ),
   );
 }

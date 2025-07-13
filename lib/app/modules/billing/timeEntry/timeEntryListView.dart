@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:collection/collection.dart';
+import '../../../utils/font_styles.dart';
 
 import '../../../data/models/case_model.dart';
 import '../../../data/models/time_entry_model.dart';
@@ -17,7 +17,7 @@ class TimeEntryListView extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Time Entries", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: colorScheme.onPrimary)),
+        title: Text("Time Entries", style: FontStyles.poppins(fontWeight: FontWeight.w600, color: colorScheme.onPrimary)),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -47,7 +47,7 @@ class TimeEntryListView extends StatelessWidget {
           if (grouped.isEmpty) {
             return Center(
               child: Text("No time entries added yet",
-                  style: GoogleFonts.poppins(fontSize: 16, color: theme.hintColor)),
+                  style: FontStyles.poppins(fontSize: 16, color: theme.hintColor)),
             );
           }
 
@@ -74,24 +74,24 @@ class TimeEntryListView extends StatelessWidget {
                     tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     title: Text(
                       caseTitle,
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 20),
+                      style: FontStyles.poppins(fontWeight: FontWeight.w600, fontSize: 20),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         "Total Hours: ${totalHours.toStringAsFixed(2)} • ₹${totalAmount.toStringAsFixed(2)}",
-                        style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w600),
+                        style: FontStyles.poppins(fontSize: 17, fontWeight: FontWeight.w600),
                       ),
                     ),
                     children: entries.map((entry) {
                       return ListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
                         title: Text(entry.description,
-                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
+                            style: FontStyles.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
                             visualDensity: VisualDensity.adaptivePlatformDensity,
                         subtitle: Text(
                           "${entry.date.toLocal().toString().split(" ")[0]} • ${entry.hours} hrs @ ₹${entry.rate}/hr",
-                          style: GoogleFonts.poppins(fontSize: 15,),
+                          style: FontStyles.poppins(fontSize: 15,),
                         ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.redAccent),

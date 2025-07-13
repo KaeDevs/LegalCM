@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../utils/font_styles.dart';
 
 class BillingOverviewView extends StatelessWidget {
   const BillingOverviewView({super.key});
@@ -15,7 +15,7 @@ class BillingOverviewView extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           "Billing",
-          style: GoogleFonts.poppins(
+          style: FontStyles.poppins(
             fontWeight: FontWeight.w600,
             color: colorScheme.onPrimary
           ),
@@ -100,7 +100,7 @@ class BillingOverviewView extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: GoogleFonts.poppins(
+          style: FontStyles.poppins(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: textTheme.titleLarge?.color,
@@ -108,7 +108,7 @@ class BillingOverviewView extends StatelessWidget {
         ),
         subtitle: Text(
           subtitle,
-          style: GoogleFonts.poppins(
+          style: FontStyles.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w400,
             color: textTheme.bodySmall?.color?.withAlpha((0.7 * 255).toInt()),

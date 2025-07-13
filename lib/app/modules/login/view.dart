@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'controller.dart';
 
 class LoginView extends GetView<LoginController> {
@@ -41,7 +40,8 @@ class LoginView extends GetView<LoginController> {
                     // App Title
                     Text(
                       'Legal CM',
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
+                        fontFamily: 'poppins',
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey.shade800,
@@ -51,7 +51,8 @@ class LoginView extends GetView<LoginController> {
                     // Subtitle
                     Text(
                       'Manage your legal cases efficiently',
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
+                        fontFamily: 'poppins',
                         fontSize: 16,
                         color: Colors.grey.shade600,
                       ),
@@ -70,7 +71,7 @@ class LoginView extends GetView<LoginController> {
                               backgroundColor: Colors.white,
                               foregroundColor: Colors.grey.shade800,
                               elevation: 2,
-                              shadowColor: Colors.black.withOpacity(0.1),
+                              shadowColor: Colors.black.withValues(alpha: 0.1),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 side: BorderSide(color: Colors.grey.shade300),
@@ -101,7 +102,8 @@ class LoginView extends GetView<LoginController> {
                               controller.isLoading.value
                                   ? 'Signing in...'
                                   : 'Continue with Google',
-                              style: GoogleFonts.poppins(
+                              style: TextStyle(
+                                fontFamily: 'poppins',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -112,7 +114,8 @@ class LoginView extends GetView<LoginController> {
                     // Terms and Privacy
                     Text(
                       'By continuing, you agree to our Terms of Service and Privacy Policy',
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
+                        fontFamily: 'poppins',
                         fontSize: 12,
                         color: Colors.grey.shade500,
                       ),
@@ -126,7 +129,7 @@ class LoginView extends GetView<LoginController> {
           // Full-screen loading overlay
           Obx(() => controller.isLoading.value
               ? Container(
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withValues(alpha: 0.4),
                   child: const Center(
                     child: CircularProgressIndicator(),
                   ),
