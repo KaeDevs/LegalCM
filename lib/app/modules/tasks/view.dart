@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../utils/font_styles.dart';
+import '../../services/ad_service.dart';
 import 'task_controller.dart';
 import 'task_detail_view.dart';
 
@@ -44,73 +45,86 @@ class TaskListView extends StatelessWidget {
             ),
           );
         }
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: tasks.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (_, i) {
-            final t = tasks[i];
+        return Column(
+          children: [
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: tasks.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (_, i) {
+                  final t = tasks[i];
 
-            return Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 2,
-              color: t.isCompleted
-                  ? colorScheme.surfaceContainerHighest.withAlpha((0.6 * 255).toInt() )
-                  : theme.cardColor,
-              child: ListTile(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                title: Text(
-                  t.title,
-                  style: FontStyles.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    decoration:
-                        t.isCompleted ? TextDecoration.lineThrough : null,
-                    color: theme.textTheme.titleLarge!.color,
-                  ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        const Icon(Icons.calendar_today, size: 16),
-                        const SizedBox(width: 4),
-                       Text("Due: ${DateFormat.yMMMd().format(t.dueDate.toLocal())}",
-                            style: theme.textTheme.bodySmall),
-                      ],
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      t.isCompleted
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked,
-                      color: t.isCompleted ? Colors.green : theme.iconTheme.color,
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.redAccent),
-                      onPressed: () {
-                        controller.deleteSelected([t]);
-                        // Get.snackbar('Deleted', 'Task "${t.title}" removed');
+                    elevation: 2,
+                    color: t.isCompleted
+                        ? colorScheme.surfaceContainerHighest.withAlpha((0.6 * 255).toInt() )
+                        : theme.cardColor,
+                    child: ListTile(
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      title: Text(
+                        t.title,
+                        style: FontStyles.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          decoration:
+                              t.isCompleted ? TextDecoration.lineThrough : null,
+                          color: theme.textTheme.titleLarge!.color,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              const Icon(Icons.calendar_today, size: 16),
+                              const SizedBox(width: 4),
+                             Text("Due: ${DateFormat.yMMMd().format(t.dueDate.toLocal())}",
+                                  style: theme.textTheme.bodySmall),
+                            ],
+                          ),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            t.isCompleted
+                                ? Icons.check_circle
+                                : Icons.radio_button_unchecked,
+                            color: t.isCompleted ? Colors.green : theme.iconTheme.color,
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.redAccent),
+                            onPressed: () {
+                              controller.deleteSelected([t]);
+                              // Get.snackbar('Deleted', 'Task "${t.title}" removed');
+                            },
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        Get.to(() => TaskDetailView(task: t));
                       },
                     ),
-                  ],
-                ),
-                onTap: () {
-                  Get.to(() => TaskDetailView(task: t));
+                  );
                 },
               ),
-            );
-          },
+            ),
+            // Banner Ad for free tier users
+            Builder(
+              builder: (context) {
+                final bannerAd = controller.adService.getBannerAd();
+                return bannerAd ?? const SizedBox.shrink();
+              },
+            ),
+          ],
         );
       }),
       floatingActionButton: FloatingActionButton.extended(

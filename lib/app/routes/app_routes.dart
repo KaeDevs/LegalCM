@@ -22,6 +22,8 @@ import '../modules/clients/view.dart';
 import '../modules/calendar/view.dart';
 import '../modules/tasks/add_task_view.dart';
 import '../modules/tasks/view.dart';
+import '../modules/subscription/view.dart';
+import '../modules/subscription/binding.dart';
 
 class AppPages {
   static const initial = '/splash';
@@ -50,7 +52,7 @@ class AppPages {
     ),
     GetPage(
       name: '/cases',
-      page: () => const CasesView(),
+      page: () => CasesView(),
       binding: CaseBinding(),
       // transition: Transition.rightToLeftWithFade,
       transitionDuration: const Duration(milliseconds: 250),
@@ -63,7 +65,7 @@ class AppPages {
     ),
     GetPage(
       name: '/clients',
-      page: () => const ClientsView(),
+      page: () => ClientsView(),
       binding: ClientBinding(),
       // transition: Transition.rightToLeftWithFade,
       transitionDuration: const Duration(milliseconds: 250),
@@ -118,7 +120,7 @@ class AppPages {
     ),
     GetPage(
       name: '/billing',
-      page: () => const BillingOverviewView(),
+      page: () => BillingOverviewView(),
       // transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 250),
     ),
@@ -133,6 +135,13 @@ class AppPages {
       page: () => const AddInvoiceView(),
       // transition: Transition.downToUp,
       transitionDuration: const Duration(milliseconds: 200),
+    ),
+    GetPage(
+      name: '/subscription',
+      page: () => const SubscriptionView(),
+      binding: SubscriptionBinding(),
+      // transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 250),
     ),
 
   ];

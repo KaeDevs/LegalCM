@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../utils/font_styles.dart';
+import '../../services/ad_service.dart';
 
 class BillingOverviewView extends StatelessWidget {
-  const BillingOverviewView({super.key});
-
+  BillingOverviewView({super.key});
+  final adService = AdService();
   @override
   Widget build(BuildContext context) {
+  final bannerAd = adService.getBannerAd();
     final theme = Theme.of(context);
     // final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
@@ -37,35 +39,46 @@ class BillingOverviewView extends StatelessWidget {
         backgroundColor: theme.appBarTheme.backgroundColor,
         iconTheme: IconThemeData(color: colorScheme.onPrimary),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: Column(
         children: [
-          _buildBillingTile(
-            context,
-            icon: Icons.timer,
-            iconColor: colorScheme.primary,
-            title: "Time Entries",
-            subtitle: "Track billable hours by case",
-            onTap: () => Get.toNamed('/time-entries'),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _buildBillingTile(
+                  context,
+                  icon: Icons.timer,
+                  iconColor: colorScheme.primary,
+                  title: "Time Entries",
+                  subtitle: "Track billable hours by case",
+                  onTap: () => Get.toNamed('/time-entries'),
+                ),
+                const SizedBox(height: 12),
+                _buildBillingTile(
+                  context,
+                  icon: Icons.receipt_long,
+                  iconColor: colorScheme.secondary,
+                  title: "Expenses",
+                  subtitle: "Log case-related expenses",
+                  onTap: () => Get.toNamed('/expense-list'),
+                ),
+                const SizedBox(height: 12),
+                _buildBillingTile(
+                  context,
+                  icon: Icons.picture_as_pdf,
+                  iconColor: colorScheme.tertiary,
+                  title: "Invoices",
+                  subtitle: "Generate and view invoices",
+                  onTap: () => Get.toNamed('/invoice-list'),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          _buildBillingTile(
-            context,
-            icon: Icons.receipt_long,
-            iconColor: colorScheme.secondary,
-            title: "Expenses",
-            subtitle: "Log case-related expenses",
-            onTap: () => Get.toNamed('/expense-list'),
-          ),
-          const SizedBox(height: 12),
-          _buildBillingTile(
-            context,
-            icon: Icons.picture_as_pdf,
-            iconColor: colorScheme.tertiary,
-            title: "Invoices",
-            subtitle: "Generate and view invoices",
-            onTap: () => Get.toNamed('/invoice-list'),
-          ),
+          // Banner Ad for free tier users
+          
+            
+            bannerAd ?? const SizedBox.shrink()
+          
         ],
       ),
     );

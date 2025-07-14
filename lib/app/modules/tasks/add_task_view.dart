@@ -5,89 +5,58 @@ import '../../data/models/task_model.dart';
 import '../../data/models/case_model.dart';
 import 'task_controller.dart';
 
-class AddTaskView extends StatefulWidget {
+class AddTaskView extends StatelessWidget {
   const AddTaskView({super.key});
 
   @override
-  State<AddTaskView> createState() => _AddTaskViewState();
-}
-
-class _AddTaskViewState extends State<AddTaskView> {
-  final controller = Get.find<TaskController>();
-  final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descController = TextEditingController();
-  DateTime _dueDate = DateTime.now();
-  final bool _hasReminder = false;//could be used later
-  String? _selectedCaseId;
-
-  final caseList = Hive.box<CaseModel>('cases').values.toList();
-
-  Future<void> _pickDateTime() async {
-  final date = await showDatePicker(
-    context: context,
-    initialDate: _dueDate,
-    firstDate: DateTime.now().add(const Duration(minutes: 2)),
-    lastDate: DateTime(2100),
-  );
-
-  if (date == null) return;
-
-  final time = await showTimePicker(
-    context: context,
-    initialTime: TimeOfDay.fromDateTime(_dueDate),
-  );
-
-  if (time == null) return;
-
-  setState(() {
-    _dueDate = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
-  });
-}
-
-
- void _saveTask() async {
-  if (!_formKey.currentState!.validate()) return;
-
-  final id = DateTime.now().millisecondsSinceEpoch.remainder(1000000000);
-
-  final task = TaskModel(
-    id: id.toString(),
-    title: _titleController.text.trim(),
-    description: _descController.text.trim(),
-    dueDate: _dueDate,
-    hasReminder: _hasReminder,
-    linkedCaseId: _selectedCaseId,
-    isCompleted: false,
-  );
-
-  await Hive.box<TaskModel>('tasks').add(task);
-
-  // ⏰ Schedule Notification
-  // if (_hasReminder) {
-  //   await NotificationService.scheduleNotification(
-  //     id: id,
-  //     title: "Reminder: ${task.title}",
-  //     body: task.description?.isNotEmpty == true
-  //         ? task.description!
-  //         : 'Your task is due today!',
-  //     scheduledDate: _dueDate,
-  //   );
-  // }
-
-  Get.back();
-  Get.snackbar("Success", "Task added successfully!");
-}
-
-
-  @override
   Widget build(BuildContext context) {
+    final controller = Get.find<TaskController>();
+    final _formKey = GlobalKey<FormState>();
+    final _titleController = TextEditingController();
+    final _descController = TextEditingController();
+    final _dueDate = Rx<DateTime>(DateTime.now());
+    final _selectedCaseId = RxnString();
+    final caseList = Hive.box<CaseModel>('cases').values.toList();
+
+    Future<void> _pickDateTime() async {
+      final date = await showDatePicker(
+        context: context,
+        initialDate: _dueDate.value,
+        firstDate: DateTime.now().add(const Duration(minutes: 2)),
+        lastDate: DateTime(2100),
+      );
+      if (date == null) return;
+      final time = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(_dueDate.value),
+      );
+      if (time == null) return;
+      _dueDate.value = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
+    }
+
+    void _saveTask() async {
+      if (!_formKey.currentState!.validate()) return;
+      final id = DateTime.now().millisecondsSinceEpoch.remainder(1000000000);
+      final task = TaskModel(
+        id: id.toString(),
+        title: _titleController.text.trim(),
+        description: _descController.text.trim(),
+        dueDate: _dueDate.value,
+        hasReminder: false,
+        linkedCaseId: _selectedCaseId.value,
+        isCompleted: false,
+      );
+      await Hive.box<TaskModel>('tasks').add(task);
+      Get.back();
+      Get.snackbar("Success", "Task added successfully!");
+    }
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(title: const Text("Add Task")),
@@ -109,28 +78,23 @@ class _AddTaskViewState extends State<AddTaskView> {
                 maxLines: 3,
               ),
               const SizedBox(height: 10),
-              ListTile(
+              Obx(() => ListTile(
                 title: const Text("Due Date"),
-                subtitle: Text("${_dueDate.toLocal()}".split(' ')[0]),
+                subtitle: Text("${_dueDate.value.toLocal()}".split(' ')[0]),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: _pickDateTime,
-              ),
-              DropdownButtonFormField<String>(
+              )),
+              Obx(() => DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: "Link to Case"),
-                value: _selectedCaseId,
+                value: _selectedCaseId.value,
                 items: caseList.map((c) {
                   return DropdownMenuItem(
                     value: c.id,
                     child: Text(c.title),
                   );
                 }).toList(),
-                onChanged: (val) => setState(() => _selectedCaseId = val),
-              ),
-              // SwitchListTile(
-              //   value: _hasReminder,
-              //   onChanged: (val) => setState(() => _hasReminder = val),
-              //   title: const Text("Enable Reminder"),
-              // ),
+                onChanged: (val) => _selectedCaseId.value = val,
+              )),
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: _saveTask,

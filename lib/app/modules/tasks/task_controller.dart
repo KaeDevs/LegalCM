@@ -2,10 +2,12 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 
 import '../../data/models/task_model.dart';
+import '../../services/ad_service.dart';
 
 class TaskController extends GetxController {
   var tasks = <TaskModel>[].obs;
   late Box<TaskModel> taskBox;
+  final AdService adService = AdService();
 
   @override
   void onInit() {
@@ -14,6 +16,9 @@ class TaskController extends GetxController {
 
     // Load tasks initially
     loadTasks();
+
+    // Load banner ad
+    adService.loadBannerAd();
 
     // Listen for any changes in the box and reload tasks automatically
     taskBox.watch().listen((event) {

@@ -9,169 +9,134 @@ import '../clients/add_client_view.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import '../cases/controller.dart';
+import 'package:flutter/material.dart';
 
 
-class AddCaseView extends StatefulWidget {
+class AddCaseView extends StatelessWidget {
   final CaseModel? existingCase;
-
   const AddCaseView({super.key, this.existingCase});
 
   @override
-  State<AddCaseView> createState() => _AddCaseViewState();
-}
-
-class _AddCaseViewState extends State<AddCaseView> {
-  final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _courtController = TextEditingController();
-  final _courtNoController = TextEditingController();
-  final _notesController = TextEditingController();
-  final _petitionerController = TextEditingController();
-  final _petitionerAdvController = TextEditingController();
-  final _respondentController = TextEditingController();
-  final _respondentAdvController = TextEditingController();
-  String _status = 'Pending';
-  DateTime _hearingDate = DateTime.now();
-  List<String> _attachedFiles = [];
-
-  ClientModel? _selectedClient;
-  List<ClientModel> _clients = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _clients = Hive.box<ClientModel>('clients').values.toList();
-
-    if (widget.existingCase != null) {
-      final c = widget.existingCase!;
+  Widget build(BuildContext context) {
+    final controller = Get.put(CasesController());
+    final _formKey = GlobalKey<FormState>();
+    final _titleController = TextEditingController();
+    final _courtController = TextEditingController();
+    final _courtNoController = TextEditingController();
+    final _notesController = TextEditingController();
+    final _petitionerController = TextEditingController();
+    final _petitionerAdvController = TextEditingController();
+    final _respondentController = TextEditingController();
+    final _respondentAdvController = TextEditingController();
+    final _status = RxString('Pending');
+    final _hearingDate = Rx<DateTime>(DateTime.now());
+    final _attachedFiles = <String>[].obs;
+    final _clients = Hive.box<ClientModel>('clients').values.toList();
+    final _selectedClient = Rxn<ClientModel>();
+    if (existingCase != null) {
+      final c = existingCase!;
       _titleController.text = c.title;
       _courtController.text = c.court;
       _courtNoController.text = c.courtNo;
       _notesController.text = c.notes;
-      _status = c.status;
-      _hearingDate = c.nextHearing;
+      _status.value = c.status;
+      _hearingDate.value = c.nextHearing;
       _petitionerController.text = c.petitioner ?? '';
       _petitionerAdvController.text = c.petitionerAdv ?? '';
       _respondentController.text = c.respondent ?? '';
       _respondentAdvController.text = c.respondentAdv ?? '';
-      _attachedFiles = List<String>.from(c.attachedFiles ?? []);
-
+      _attachedFiles.assignAll(List<String>.from(c.attachedFiles ?? []));
       if (c.clientId != null) {
-        _selectedClient =
-            _clients.firstWhereOrNull((cl) => cl.id == c.clientId);
+        _selectedClient.value = _clients.firstWhereOrNull((cl) => cl.id == c.clientId);
       }
     }
-  }
-
-  void _saveCase() async {
-    if (_formKey.currentState!.validate() && _selectedClient != null) {
-      if (_attachedFiles.isNotEmpty) {
-        // Text('${_attachedFiles.length} files attached');}
-        // print("Attached");
-      } else {
-        // print("Not Attached");
-      }
-
-      if (widget.existingCase != null) {
-        widget.existingCase!
-          ..title = _titleController.text.trim()
-          ..clientName = _selectedClient!.name
-          ..clientId = _selectedClient!.id
-          ..court = _courtController.text.trim()
-          ..courtNo = _courtNoController.text.trim()
-          ..status = _status
-          ..nextHearing = _hearingDate
-          ..notes = _notesController.text.trim()
-          ..petitioner = _petitionerController.text.trim()
-          ..petitionerAdv = _petitionerAdvController.text.trim()
-          ..respondent = _respondentController.text.trim()
-          ..respondentAdv = _respondentAdvController.text.trim()
-          ..attachedFiles = _attachedFiles;
-
-        await widget.existingCase!.save();
-        Get.back(result: 'updated');
-        // Get.back(result: 'updated');
-
-        Get.snackbar('Updated', 'Case updated successfully!');
-      } else {
-        final newCase = CaseModel(
-          id: const Uuid().v4(),
-          title: _titleController.text.trim(),
-          clientName: _selectedClient!.name,
-          clientId: _selectedClient!.id,
-          court: _courtController.text.trim(),
-          courtNo: _courtNoController.text.trim(),
-          status: _status,
-          nextHearing: _hearingDate,
-          notes: _notesController.text.trim(),
-          petitioner: _petitionerController.text.trim(),
-          petitionerAdv: _petitionerAdvController.text.trim(),
-          respondent: _respondentController.text.trim(),
-          respondentAdv: _respondentAdvController.text.trim(),
-          attachedFiles: _attachedFiles
-        );
-        await Hive.box<CaseModel>('cases').add(newCase);
-        Get.back(result: 'updated');
-        // Get.back(result: 'updated');
-
-        Get.snackbar('Success', 'Case added successfully!');
+    void _saveCase() async {
+      if (_formKey.currentState!.validate() && _selectedClient.value != null) {
+        if (existingCase != null) {
+          existingCase!
+            ..title = _titleController.text.trim()
+            ..clientName = _selectedClient.value!.name
+            ..clientId = _selectedClient.value!.id
+            ..court = _courtController.text.trim()
+            ..courtNo = _courtNoController.text.trim()
+            ..status = _status.value
+            ..nextHearing = _hearingDate.value
+            ..notes = _notesController.text.trim()
+            ..petitioner = _petitionerController.text.trim()
+            ..petitionerAdv = _petitionerAdvController.text.trim()
+            ..respondent = _respondentController.text.trim()
+            ..respondentAdv = _respondentAdvController.text.trim()
+            ..attachedFiles = _attachedFiles;
+          await existingCase!.save();
+          Get.back(result: 'updated');
+          Get.snackbar('Updated', 'Case updated successfully!');
+        } else {
+          final newCase = CaseModel(
+            id: const Uuid().v4(),
+            title: _titleController.text.trim(),
+            clientName: _selectedClient.value!.name,
+            clientId: _selectedClient.value!.id,
+            court: _courtController.text.trim(),
+            courtNo: _courtNoController.text.trim(),
+            status: _status.value,
+            nextHearing: _hearingDate.value,
+            notes: _notesController.text.trim(),
+            petitioner: _petitionerController.text.trim(),
+            petitionerAdv: _petitionerAdvController.text.trim(),
+            respondent: _respondentController.text.trim(),
+            respondentAdv: _respondentAdvController.text.trim(),
+            attachedFiles: _attachedFiles,
+          );
+          await Hive.box<CaseModel>('cases').add(newCase);
+          Get.back(result: 'updated');
+          Get.snackbar('Success', 'Case added successfully!');
+        }
       }
     }
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _hearingDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) setState(() => _hearingDate = picked);
-  }
-
-  void _addNewClient() async {
-    await Get.to(() => AddClientView());
-    setState(() {
-      _clients = Hive.box<ClientModel>('clients').values.toList();
-    });
-  }
-
-  Future<void> _pickFiles() async {
-  final result = await FilePicker.platform.pickFiles(allowMultiple: true);
-  if (result != null) {
-    final files = result.paths.whereType<String>().toList();
-    final localPaths = await saveFilesToLocalStorage(files);
-    setState(() {
-      _attachedFiles.addAll(localPaths);
-    });
-  }
-}
-
-
-  
-Future<List<String>> saveFilesToLocalStorage(List<String> paths) async {
-  final List<String> copiedPaths = [];
-  final appDir = await getApplicationDocumentsDirectory();
-
-  for (final originalPath in paths) {
-    final file = File(originalPath);
-    if (await file.exists()) {
-      final newPath = p.join(appDir.path, p.basename(originalPath));
-      await file.copy(newPath);
-      copiedPaths.add(newPath);
+    Future<void> _pickDate() async {
+      final picked = await showDatePicker(
+        context: context,
+        initialDate: _hearingDate.value,
+        firstDate: DateTime(2020),
+        lastDate: DateTime(2100),
+      );
+      if (picked != null) _hearingDate.value = picked;
     }
-  }
-  return copiedPaths;
-}
+    void _addNewClient() async {
+      await Get.to(() => AddClientView());
+      _clients.clear();
+      _clients.addAll(Hive.box<ClientModel>('clients').values.toList());
+    }
+    
 
-  @override
-  Widget build(BuildContext context) {
+    Future<List<String>> _saveFilesToLocalStorage(List<String> paths) async {
+      final List<String> copiedPaths = [];
+      final appDir = await getApplicationDocumentsDirectory();
+      for (final originalPath in paths) {
+        final file = File(originalPath);
+        if (await file.exists()) {
+          final newPath = p.join(appDir.path, p.basename(originalPath));
+          await file.copy(newPath);
+          copiedPaths.add(newPath);
+        }
+      }
+      return copiedPaths;
+    }
+    Future<void> _pickFiles() async {
+      final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+      if (result != null) {
+        final files = result.paths.whereType<String>().toList();
+        final localPaths = await _saveFilesToLocalStorage(files);
+        _attachedFiles.addAll(localPaths);
+      }
+    }
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.existingCase == null ? 'Add New Case' : 'Edit Case'),
+        title: Text(existingCase == null ? 'Add New Case' : 'Edit Case'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -188,19 +153,19 @@ Future<List<String>> saveFilesToLocalStorage(List<String> paths) async {
               Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonFormField<ClientModel>(
-                      value: _selectedClient,
+                    child: Obx(() => DropdownButtonFormField<ClientModel>(
+                      value: _selectedClient.value,
                       items: _clients
                           .map((c) => DropdownMenuItem(
                                 value: c,
                                 child: Text(c.name),
                               ))
                           .toList(),
-                      onChanged: (val) => setState(() => _selectedClient = val),
+                      onChanged: (val) => _selectedClient.value = val,
                       decoration: const InputDecoration(labelText: 'Client'),
                       validator: (val) =>
                           val == null ? 'Select a client' : null,
-                    ),
+                    )),
                   ),
                   IconButton(
                     icon: const Icon(Icons.add),
@@ -226,15 +191,15 @@ Future<List<String>> saveFilesToLocalStorage(List<String> paths) async {
                     ),
                   ),
                   Flexible(
-                    child: DropdownButtonFormField<String>(
-                      value: _status,
+                    child: Obx(() => DropdownButtonFormField<String>(
+                      value: _status.value,
                       items: ['Pending', 'Not Filed', 'Disposed', 'Closed']
                           .map(
                               (s) => DropdownMenuItem(value: s, child: Text(s)))
                           .toList(),
-                      onChanged: (val) => setState(() => _status = val!),
+                      onChanged: (val) => _status.value = val!,
                       decoration: const InputDecoration(labelText: 'Status'),
-                    ),
+                    )),
                   ),
                 ],
               ),
@@ -243,7 +208,7 @@ Future<List<String>> saveFilesToLocalStorage(List<String> paths) async {
               ListTile(
                 title: const Text('Next Hearing Date'),
                 subtitle: Text(
-                  '${_hearingDate.day}/${_hearingDate.month}/${_hearingDate.year}',
+                  '${_hearingDate.value.day}/${_hearingDate.value.month}/${_hearingDate.value.year}',
                   style: textTheme.bodyMedium,
                 ),
                 trailing: const Icon(Icons.calendar_today),
@@ -307,7 +272,7 @@ Future<List<String>> saveFilesToLocalStorage(List<String> paths) async {
                               trailing: IconButton(
                                 icon: const Icon(Icons.close),
                                 onPressed: () {
-                                  setState(() => _attachedFiles.remove(file));
+                                  _attachedFiles.remove(file);
                                 },
                               ),
                             )),
@@ -325,7 +290,7 @@ Future<List<String>> saveFilesToLocalStorage(List<String> paths) async {
                 child: ElevatedButton.icon(
                   onPressed: _saveCase,
                   icon: const Icon(Icons.save),
-                  label: Text(widget.existingCase == null
+                  label: Text(existingCase == null
                       ? 'Save Case'
                       : 'Update Case'),
                 ),
@@ -336,4 +301,6 @@ Future<List<String>> saveFilesToLocalStorage(List<String> paths) async {
       ),
     );
   }
+
+  
 }

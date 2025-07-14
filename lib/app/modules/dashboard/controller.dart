@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 
 import '../../services/app_update.dart';
+import '../../services/ad_service.dart';
 import '../tasks/task_controller.dart';
 
 class DashBoardController extends GetxController{
@@ -12,6 +13,7 @@ class DashBoardController extends GetxController{
   final RxBool isConnected = true.obs;
   final Connectivity _connectivity = Connectivity();
   final isBackingUp = false.obs;
+  final AdService adService = AdService();
 
 
   void _updateConnectionStatus(List<ConnectivityResult> connectivityResult) {
@@ -53,6 +55,9 @@ class DashBoardController extends GetxController{
     // print("start dashboard");
     checkForUpdate();
     Get.put(TaskController());
+    
+    // Load banner ad
+    adService.loadBannerAd();
     
     // Initialize connectivity listener
     _connectivity.onConnectivityChanged.listen((List<ConnectivityResult> results) {

@@ -4,74 +4,57 @@ import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../data/models/client_model.dart';
+import 'controller.dart';
 
-class AddClientView extends StatefulWidget {
-  final ClientModel? existingClient;
-
-  AddClientView({super.key}) : existingClient = Get.arguments;
-
-  @override
-  State<AddClientView> createState() => _AddClientViewState();
-}
-
-
-class _AddClientViewState extends State<AddClientView> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _contactController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _stateController = TextEditingController();
-
-  @override
-void initState() {
-  super.initState();
-  if (widget.existingClient != null) {
-    _nameController.text = widget.existingClient!.name;
-    _contactController.text = widget.existingClient!.contactNumber;
-    _emailController.text = widget.existingClient!.email;
-    _cityController.text = widget.existingClient!.city;
-    _stateController.text = widget.existingClient!.state;
-  }
-}
-
-
-  void _saveClient() async {
-    if (_formKey.currentState!.validate()) {
-      
-      if (widget.existingClient != null) {
-        // Update existing client
-        widget.existingClient!
-          ..name = _nameController.text.trim()
-          ..contactNumber = _contactController.text.trim()
-          ..email = _emailController.text.trim()
-          ..city = _cityController.text.trim()
-          ..state = _stateController.text.trim();
-        await widget.existingClient!.save();
-        Get.back();
-        Get.snackbar('Updated', 'Client updated successfully');
-      } else {
-        // Add new client
-        final newClient = ClientModel(
-          id: const Uuid().v4(),
-          name: _nameController.text.trim(),
-          contactNumber: _contactController.text.trim(),
-          email: _emailController.text.trim(),
-          city: _cityController.text.trim(),
-          state: _stateController.text.trim(),
-        );
-        final box = Hive.box<ClientModel>('clients');
-        await box.add(newClient);
-        Get.back();
-        Get.snackbar('Success', 'Client added successfully');
-      }
-    }
-  }
+class AddClientView extends StatelessWidget {
+  AddClientView({super.key});
+  final controller = Get.put(ClientsController());
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.existingClient != null;
-
+    final isEditing = Get.arguments != null;
+    final _formKey = GlobalKey<FormState>();
+    final _nameController = TextEditingController();
+    final _contactController = TextEditingController();
+    final _emailController = TextEditingController();
+    final _cityController = TextEditingController();
+    final _stateController = TextEditingController();
+    final existingClient = Get.arguments as ClientModel?;
+    if (existingClient != null) {
+      _nameController.text = existingClient.name;
+      _contactController.text = existingClient.contactNumber;
+      _emailController.text = existingClient.email;
+      _cityController.text = existingClient.city;
+      _stateController.text = existingClient.state;
+    }
+    void _saveClient() async {
+      if (_formKey.currentState!.validate()) {
+        if (existingClient != null) {
+          existingClient
+            ..name = _nameController.text.trim()
+            ..contactNumber = _contactController.text.trim()
+            ..email = _emailController.text.trim()
+            ..city = _cityController.text.trim()
+            ..state = _stateController.text.trim();
+          await existingClient.save();
+          Get.back();
+          Get.snackbar('Updated', 'Client updated successfully');
+        } else {
+          final newClient = ClientModel(
+            id: const Uuid().v4(),
+            name: _nameController.text.trim(),
+            contactNumber: _contactController.text.trim(),
+            email: _emailController.text.trim(),
+            city: _cityController.text.trim(),
+            state: _stateController.text.trim(),
+          );
+          final box = Hive.box<ClientModel>('clients');
+          await box.add(newClient);
+          Get.back();
+          Get.snackbar('Success', 'Client added successfully');
+        }
+      }
+    }
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(

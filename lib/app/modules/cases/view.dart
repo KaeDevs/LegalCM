@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:legalcm/app/modules/cases/controller.dart';
 import '../../utils/font_styles.dart';
+import '../../services/ad_service.dart';
 
 import '../../data/models/case_model.dart';
 import 'case_detail_view.dart';
@@ -12,6 +13,8 @@ class CasesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final adService = AdService();
+    final bannerAd = adService.getBannerAd();
     final controller = Get.put(CasesController());
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -143,7 +146,7 @@ class CasesView extends StatelessWidget {
                     label: Text('$status ($count)'),
                     selected: isSelected,
                     onSelected: (_) => controller.updateStatusFilter(status),
-                    selectedColor: colorScheme.primary.withValues(alpha: 0.2),
+                    selectedColor: colorScheme.primary.withAlpha(50),
                     checkmarkColor: colorScheme.primary,
                   ),
                 );
@@ -170,13 +173,21 @@ class CasesView extends StatelessWidget {
                     );
                   }
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    itemCount: cases.length,
-                    itemBuilder: (context, index) {
-                      final c = cases[index];
-                      return _buildCaseCard(c, theme, context);
-                    },
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          itemCount: cases.length,
+                          itemBuilder: (context, index) {
+                            final c = cases[index];
+                            return _buildCaseCard(c, theme, context);
+                          },
+                        ),
+                      ),
+                      // Banner Ad for free tier users
+                      bannerAd ?? const SizedBox.shrink(),
+                    ],
                   );
                 });
               },
@@ -262,7 +273,7 @@ class CasesView extends StatelessWidget {
 
   Future<void> _showDateRangePicker(CasesController controller) async {
     final DateTimeRange? picked = await showDateRangePicker(
-      context: Get.context!,
+      context: Get.context!, // Use Get.context! to access context
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
       initialDateRange: controller.dateRange.value,

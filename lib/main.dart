@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'app/data/models/case_model.dart';
@@ -9,6 +10,7 @@ import 'app/data/models/time_entry_model.dart';
 import 'app/data/models/expense_model.dart';
 import 'app/data/models/invoice_model.dart';
 import 'app/data/models/user_model.dart';
+import 'app/data/models/subscription_model.dart';
 import 'app/routes/app_routes.dart';
 import 'app/theme/app_theme.dart';
 
@@ -17,7 +19,7 @@ void main() async {
   
   // Initialize Firebase
   await Firebase.initializeApp();
-  
+  await MobileAds.instance.initialize();
   await Hive.initFlutter();
   // await NotificationService.init();
 
@@ -28,6 +30,8 @@ void main() async {
   Hive.registerAdapter(ExpenseModelAdapter());
   Hive.registerAdapter(InvoiceModelAdapter());
   Hive.registerAdapter(UserModelAdapter());
+  Hive.registerAdapter(SubscriptionModelAdapter());
+  Hive.registerAdapter(SubscriptionTierAdapter());
 
   await Hive.openBox<InvoiceModel>('invoices');
   await Hive.openBox<TaskModel>('tasks');
@@ -36,6 +40,7 @@ void main() async {
   await Hive.openBox<TimeEntryModel>('time_entries');
   await Hive.openBox<ExpenseModel>('expenses'); 
   await Hive.openBox<UserModel>('user');
+  await Hive.openBox<SubscriptionModel>('subscriptions');
 
   runApp(const MyApp());
 }

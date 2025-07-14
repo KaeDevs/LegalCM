@@ -16,6 +16,7 @@ import '../../data/models/invoice_model.dart';
 import '../../data/models/task_model.dart';
 import '../../data/models/time_entry_model.dart';
 import '../../data/models/user_model.dart';
+import '../../data/models/subscription_model.dart';
 
 class LoginController extends GetxController {
   final _backupLock = Lock();
@@ -204,6 +205,7 @@ Future<void> signOut() async {
     final clientBox = await _getSafeBox<ClientModel>('clients');
     final taskBox = await _getSafeBox<TaskModel>('tasks');
     final invoiceBox = await _getSafeBox<InvoiceModel>('invoices');
+    final subscriptionBox = await _getSafeBox<SubscriptionModel>('subscriptions');
 
     await userBox.clear();
     await caseBox.clear();
@@ -212,6 +214,7 @@ Future<void> signOut() async {
     await clientBox.clear();
     await taskBox.clear();
     await invoiceBox.clear();
+    await subscriptionBox.clear();
     
     isLoggedIn.value = false;
 
@@ -241,6 +244,7 @@ Future<void> backupToDrive(GoogleAuthClient client) async {
       if (Hive.isBoxOpen('time_entries')) await Hive.box<TimeEntryModel>('time_entries').flush();
       if (Hive.isBoxOpen('expenses')) await Hive.box<ExpenseModel>('expenses').flush();
       if (Hive.isBoxOpen('invoices')) await Hive.box<InvoiceModel>('invoices').flush();
+      if (Hive.isBoxOpen('subscriptions')) await Hive.box<SubscriptionModel>('subscriptions').flush();
 
       await Future.delayed(const Duration(milliseconds: 500));
 
@@ -357,6 +361,7 @@ Future<void> backupToDrive(GoogleAuthClient client) async {
       if (Hive.isBoxOpen('time_entries')) await Hive.box<TimeEntryModel>('time_entries').close();
       if (Hive.isBoxOpen('expenses')) await Hive.box<ExpenseModel>('expenses').close();
       if (Hive.isBoxOpen('invoices')) await Hive.box<InvoiceModel>('invoices').close();
+      if (Hive.isBoxOpen('subscriptions')) await Hive.box<SubscriptionModel>('subscriptions').close();
 
       final hiveDir = await getApplicationDocumentsDirectory();
       final hivePath = hiveDir.path;
@@ -394,6 +399,7 @@ Future<void> backupToDrive(GoogleAuthClient client) async {
       await Hive.openBox<TimeEntryModel>('time_entries');
       await Hive.openBox<ExpenseModel>('expenses');
       await Hive.openBox<InvoiceModel>('invoices');
+      await Hive.openBox<SubscriptionModel>('subscriptions');
     } catch (e) {
       // print('Error restoring from Drive: $e');
       rethrow;
@@ -425,6 +431,7 @@ Future<void> backupToDrive(GoogleAuthClient client) async {
     if (!Hive.isBoxOpen('time_entries')) await Hive.openBox<TimeEntryModel>('time_entries');
     if (!Hive.isBoxOpen('expenses')) await Hive.openBox<ExpenseModel>('expenses');
     if (!Hive.isBoxOpen('invoices')) await Hive.openBox<InvoiceModel>('invoices');
+    if (!Hive.isBoxOpen('subscriptions')) await Hive.openBox<SubscriptionModel>('subscriptions');
   }
 
 }

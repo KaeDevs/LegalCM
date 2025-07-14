@@ -3,16 +3,18 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:legalcm/app/modules/clients/controller.dart';
 import '../../utils/font_styles.dart';
+import '../../services/ad_service.dart';
 
 import '../../data/models/client_model.dart';
 import 'add_client_view.dart';
 import 'client_detail_view.dart';
 
 class ClientsView extends StatelessWidget {
-  const ClientsView({super.key});
-
+  ClientsView({super.key});
+  final adService = AdService();
   @override
   Widget build(BuildContext context) {
+                        final bannerAd = adService.getBannerAd();
     final controller = Get.put(ClientsController());
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -154,14 +156,25 @@ class ClientsView extends StatelessWidget {
                     );
                   }
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
-                    itemCount: clients.length,
-                    itemBuilder: (context, index) {
-                      final client = clients[index];
-                      return _buildClientCard(client, theme, controller);
-                    },
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          itemCount: clients.length,
+                          itemBuilder: (context, index) {
+                            final client = clients[index];
+                            return _buildClientCard(client, theme, controller);
+                          },
+                        ),
+                      ),
+                      // Banner Ad for free tier users
+                      
+                        
+                        bannerAd ?? const SizedBox.shrink()
+                      
+                    ],
                   );
                 });
               },

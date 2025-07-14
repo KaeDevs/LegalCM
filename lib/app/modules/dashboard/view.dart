@@ -11,6 +11,8 @@ import 'package:legalcm/app/modules/dashboard/controller.dart';
 import 'package:legalcm/app/modules/login/controller.dart';
 import 'package:legalcm/app/utils/tools.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../services/backup_service.dart';
+import '../../services/ad_service.dart';
 import '../../data/models/case_model.dart';
 import '../../data/models/client_model.dart';
 import '../../data/models/task_model.dart';
@@ -21,108 +23,121 @@ import 'profile_page.dart';
 class DashboardView extends GetView<DashBoardController> {
 
   DashboardView({super.key});
-
+  
   Future<void> _handleBackup(BuildContext context) async {
-  final loginController = Get.find<LoginController>(); 
-  // BuildContext currentContext = context;
+    final loginController = Get.find<LoginController>(); 
+    final backupService = BackupService();
+    
+    // Record when backup starts
+    final startTime = DateTime.now();
 
-  // Record when backup starts
-  final startTime = DateTime.now();
-
-  // Show the loading dialog
-  try {
-    Get.dialog(
-      // context: currentContext,
-      barrierDismissible: false,
-      // builder: (_) => 
-      const AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Backing up... Please wait'),
-          ],
+    // Show the loading dialog
+    try {
+      Get.dialog(
+        barrierDismissible: false,
+        const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Backing up... Please wait'),
+            ],
+          ),
         ),
-      ),
-    );
-  } catch (_) {}
-
-  try {
-    GoogleSignInAccount? googleUser;
+      );
+    } catch (_) {}
 
     try {
-      // Use a mounted check to avoid using BuildContext across async gaps
-      final mounted = Get.isRegistered<DashboardView>();
-      googleUser = await loginController.googleSignIn.signInSilently();
-      if (!(Get.isDialogOpen ?? false)) return;
-      if (googleUser == null) {
-        if (mounted) return _showError(Get.context!, 'Please sign in to Google Drive first', startTime);
+      // First check subscription limits
+      final canBackup = await backupService.canPerformBackup();
+      if (!canBackup) {
+        await _closeDialogAfterMinimumDuration(startTime);
+        _showSnackbar('You have reached your monthly backup limit. Please upgrade your subscription.', isError: true);
         return;
       }
-    } on PlatformException catch (e) {
-      if (!(Get.isDialogOpen ?? false)) return;
-      if (e.code == 'network_error') {
+
+      // Show interstitial ad for free tier users before backup
+      await controller.adService.showInterstitialAd();
+
+      GoogleSignInAccount? googleUser;
+
+      try {
+        // Use a mounted check to avoid using BuildContext across async gaps
+        final mounted = Get.isRegistered<DashboardView>();
+        googleUser = await loginController.googleSignIn.signInSilently();
+        if (!(Get.isDialogOpen ?? false)) return;
+        if (googleUser == null) {
+          if (mounted) return _showError(Get.context!, 'Please sign in to Google Drive first', startTime);
+          return;
+        }
+      } on PlatformException catch (e) {
+        if (!(Get.isDialogOpen ?? false)) return;
+        if (e.code == 'network_error') {
+          if (Get.isRegistered<DashboardView>()) {
+            return _showError(Get.context!, 'No internet connection. Please check your network.', startTime);
+          }
+          return;
+        }
+        rethrow;
+      } on SocketException {
+        if (!(Get.isDialogOpen ?? false)) return;
         if (Get.isRegistered<DashboardView>()) {
-          return _showError(Get.context!, 'No internet connection. Please check your network.', startTime);
+          return _showError(Get.context!, 'Network connection failed.', startTime);
+        }
+        return;
+      } on TimeoutException {
+        if (!(Get.isDialogOpen ?? false)) return;
+        if (Get.isRegistered<DashboardView>()) {
+          return _showError(Get.context!, 'Connection timed out.', startTime);
         }
         return;
       }
-      rethrow;
-    } on SocketException {
-      if (!(Get.isDialogOpen ?? false)) return;
-      if (Get.isRegistered<DashboardView>()) {
-        return _showError(Get.context!, 'Network connection failed.', startTime);
-      }
-      return;
-    } on TimeoutException {
-      if (!(Get.isDialogOpen ?? false)) return;
-      if (Get.isRegistered<DashboardView>()) {
-        return _showError(Get.context!, 'Connection timed out.', startTime);
-      }
-      return;
-    }
 
-    try {
-      final authHeaders = await googleUser.authHeaders;
-      final client = GoogleAuthClient(authHeaders);
-      await loginController.backupToDrive(client);
-    } on PlatformException catch (e) {
-      if (!(Get.isDialogOpen ?? false)) return;
-      if (e.code == 'network_error') {
+      try {
+        final authHeaders = await googleUser.authHeaders;
+        final client = GoogleAuthClient(authHeaders);
+        await loginController.backupToDrive(client);
+        
+        // Record the backup usage for subscription tracking
+        await backupService.recordBackup();
+        
+      } on PlatformException catch (e) {
+        if (!(Get.isDialogOpen ?? false)) return;
+        if (e.code == 'network_error') {
+          if (Get.isRegistered<DashboardView>()) {
+            return _showError(Get.context!, 'Network error during backup.', startTime);
+          }
+          return;
+        }
+        rethrow;
+      } on SocketException {
+        if (!(Get.isDialogOpen ?? false)) return;
         if (Get.isRegistered<DashboardView>()) {
           return _showError(Get.context!, 'Network error during backup.', startTime);
         }
         return;
+      } on TimeoutException {
+        if (!(Get.isDialogOpen ?? false)) return;
+        if (Get.isRegistered<DashboardView>()) {
+          return _showError(Get.context!, 'Backup timed out.', startTime);
+        }
+        return;
+      } on HttpException {
+        if (!(Get.isDialogOpen ?? false)) return;
+        if (Get.isRegistered<DashboardView>()) {
+          return _showError(Get.context!, 'Server error occurred.', startTime);
+        }
+        return;
       }
-      rethrow;
-    } on SocketException {
-      if (!(Get.isDialogOpen ?? false)) return;
-      if (Get.isRegistered<DashboardView>()) {
-        return _showError(Get.context!, 'Network error during backup.', startTime);
-      }
-      return;
-    } on TimeoutException {
-      if (!(Get.isDialogOpen ?? false)) return;
-      if (Get.isRegistered<DashboardView>()) {
-        return _showError(Get.context!, 'Backup timed out.', startTime);
-      }
-      return;
-    } on HttpException {
-      if (!(Get.isDialogOpen ?? false)) return;
-      if (Get.isRegistered<DashboardView>()) {
-        return _showError(Get.context!, 'Server error occurred.', startTime);
-      }
-      return;
-    }
 
-    await _closeDialogAfterMinimumDuration(startTime);
-    _showSnackbar('Backup completed successfully!', isError: false);
-  } catch (e) {
-    await _closeDialogAfterMinimumDuration(startTime);
-    _showSnackbar(_mapError(e), isError: true);
+      await _closeDialogAfterMinimumDuration(startTime);
+      _showSnackbar('Backup completed successfully!', isError: false);
+    } catch (e) {
+      await _closeDialogAfterMinimumDuration(startTime);
+      _showSnackbar(_mapError(e), isError: true);
+    }
   }
-}
 
   void _closeDialog() {
     if (Get.isDialogOpen ?? false) {
@@ -143,7 +158,10 @@ Future<void> _closeDialogAfterMinimumDuration(DateTime startTime) async {
     await Future.delayed(minDuration - elapsed);
   }
 
-  _closeDialog(); // Close the dialog safely
+  // Ensure dialog is closed
+  if (Get.isDialogOpen ?? false) {
+    Get.back();
+  }
 }
 
 
@@ -201,6 +219,9 @@ Future<void> _closeDialogAfterMinimumDuration(DateTime startTime) async {
               },
               icon: Icon(Icons.person_outline)),
           actions: [
+                    IconButton(onPressed: (){
+                      Get.toNamed('/subscription');
+                    }, icon: Icon(Icons.star)),
             PopupMenuButton(
                 icon: Icon(Icons.more_vert),
                 onSelected: (value) {
@@ -229,7 +250,7 @@ Future<void> _closeDialogAfterMinimumDuration(DateTime startTime) async {
                       PopupMenuItem(value: 'Share', child: Text('Share')),
                       PopupMenuItem(value: 'Sign Out', child: Text('Sign Out')),
                       PopupMenuItem(value: 'Exit', child: Text('Exit')),
-                    ])
+                    ]),
           ]),
       body: Stack(
         children: [
@@ -294,7 +315,9 @@ Future<void> _closeDialogAfterMinimumDuration(DateTime startTime) async {
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
+                
+                // const SizedBox(height: 32),
                 Card(
                   elevation: 2,
                   borderOnForeground: true,
@@ -412,6 +435,15 @@ Future<void> _closeDialogAfterMinimumDuration(DateTime startTime) async {
                   ),
                 ),
                 const SizedBox(height: 32),
+                
+                                // Banner Ad for free tier users
+                Builder(
+                  builder: (context) {
+                    final bannerAd = controller.adService.getBannerAd();
+                    return bannerAd ?? const SizedBox.shrink();
+                  },
+                ),
+                
               ],
             ),
           ),
